@@ -1,3 +1,8 @@
+data
+tables
+chromrings/_version.py
+chromrings/test.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
