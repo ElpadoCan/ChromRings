@@ -36,7 +36,8 @@ def get_objContours(obj, obj_image=None, all=False):
 def radial_profiles(
         lab, img_data, extra_radius=0, how='object', 
         invert_intensities=True, resample_bin_size_perc=5,
-        tqdm_kwargs=None, normalize_profile=True
+        tqdm_kwargs=None, normalize_every_profile=True,
+        normalise_average_profile=False
     ):
     if tqdm_kwargs is None:
         tqdm_kwargs = {}
@@ -106,7 +107,7 @@ def radial_profiles(
                 {'x': xx_line, 'y': yy_line, 'values': vals, 'norm_dist': dist_perc}
             )
 
-            if normalize_profile:
+            if normalize_every_profile:
                 vals = vals/vals.max()
             
             if resample_bin_size_perc > 0:
@@ -150,6 +151,8 @@ def radial_profiles(
 
         obj.mean_radial_profile = obj.radial_df.mean(axis=1)
         obj.mean_radial_profile.name = f'ID_{obj.label}_mean_radial_profile'
+        if normalise_average_profile:
+            obj.mean_radial_profile /= obj.mean_radial_profile.max()
 
         # fig, ax = plt.subplots(1,2)
         # ax[0].imshow(img_data_2D)

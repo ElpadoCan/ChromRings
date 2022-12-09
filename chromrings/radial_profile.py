@@ -16,6 +16,8 @@ from tqdm import tqdm
 
 from chromrings import data_path, core, utils, tables_path
 
+SAVE = False
+
 exp_folders = ['0_test_3D_Nada_24-11-2022']
 channel_name = 'w1SDC488'
 
@@ -51,7 +53,8 @@ for exp_folder in exp_folders:
                 resample_bin_size_perc=5,
                 extra_radius=0,
                 tqdm_kwargs = {'position': 1, 'leave': False, 'ncols': 100},
-                normalize_profile=True
+                normalize_every_profile=True,
+                normalise_average_profile=False
             )
 
             IDs = []
@@ -107,12 +110,13 @@ final_df_summary = pd.concat(
     names=['experiment', 'condition', 'Position_n', 'ID']
 )
 
-df_profile_starved_path = os.path.join(tables_path, 'profiles_starved.csv')
-df_profile_starved.to_csv(df_profile_starved_path)
+if SAVE:
+    df_profile_starved_path = os.path.join(tables_path, 'profiles_starved.csv')
+    df_profile_starved.to_csv(df_profile_starved_path)
 
-df_profile_fed_path = os.path.join(tables_path, 'profiles_fed.csv')
-df_profile_fed.to_csv(df_profile_fed_path)
+    df_profile_fed_path = os.path.join(tables_path, 'profiles_fed.csv')
+    df_profile_fed.to_csv(df_profile_fed_path)
 
-final_df_summary_path = os.path.join(tables_path, 'profiles_summary.csv')
-final_df_summary.to_csv(final_df_summary_path)
+    final_df_summary_path = os.path.join(tables_path, 'profiles_summary.csv')
+    final_df_summary.to_csv(final_df_summary_path)
 
