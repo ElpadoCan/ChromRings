@@ -126,13 +126,13 @@ def radial_profiles(
 
             all_dist.update(dist_perc)
 
-            # fig, ax = plt.subplots(1,2)
-            # ax[0].imshow(img_data_2D)
-            # ax[0].set_xlim((xmin-sp, xmax+sp))
-            # ax[0].set_ylim((ymin-sp, ymax+sp))
-            # ax[0].plot(xx_line, yy_line, 'r.')
-            # ax[1].plot(dist_perc, vals)
-            # plt.show()
+            fig, ax = plt.subplots(1,2)
+            ax[0].imshow(img_data_2D)
+            ax[0].set_xlim((xmin-sp, xmax+sp))
+            ax[0].set_ylim((ymin-sp, ymax+sp))
+            ax[0].plot(xx_line, yy_line, 'r.')
+            ax[1].plot(dist_perc, vals)
+            plt.show()
 
         if not resample_bin_size_perc > 0:
             obj.resampled_radial_profiles = obj.radial_profiles
