@@ -139,9 +139,7 @@ def radial_profiles(
 
 
         cols = [f'value_{r}' for r in range(len(obj.resampled_radial_profiles))]
-        obj.radial_df = pd.DataFrame(
-            index=list(all_dist), columns=cols
-        )
+        obj.radial_df = pd.DataFrame(index=list(all_dist), columns=cols)
         for r, profile in enumerate(obj.resampled_radial_profiles):
             idx = profile['norm_dist']
             # obj.radial_df[f'value_{r}'] = np.nan

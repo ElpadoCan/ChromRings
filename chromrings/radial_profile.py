@@ -52,7 +52,7 @@ for exp_folder in exp_folders:
                 invert_intensities=True, 
                 resample_bin_size_perc=5,
                 extra_radius=0,
-                tqdm_kwargs = {'position': 1, 'leave': False, 'ncols': 100},
+                tqdm_kwargs={'position': 1, 'leave': False, 'ncols': 100},
                 normalize_every_profile=True,
                 normalise_average_profile=False
             )

@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-import diptest
+# import diptest
 
 from chromrings import tables_path, core
 

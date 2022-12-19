@@ -1,5 +1,6 @@
 data
 tables
+documents
 chromrings/_version.py
 chromrings/test.py
 
