@@ -1,0 +1,48 @@
+{
+    "0_test_3D_Nada": {
+        "folder_path": "data/0_test_3D_Nada_24-11-2022",
+        "experiments": ["fed", "str"]
+    },
+    "1_test_3D_vs_2D": {
+        "folder_path": "data/1_test_3D_vs_2D_01-02-2023",
+        "experiments": ["2D_seg/fed", "3D_seg/str", "2D_seg/fed", "3D_seg/fed"],
+        "channel": "SDC488"
+    },
+    "2_Pol_I_II": {
+        "folder_path": "data/2_Pol_I_II_III",
+        "experiments": [
+            "Pol I-auxin 3hrs", 
+            "Pol I-EtOH (control)", 
+            "Pol II-auxin 3hrs", 
+            "Pol II-EtOH (control)", 
+            "Pol III-auxin 3hrs", 
+            "Pol III-EtOH (control)", 
+            "Pol II-refed", 
+            "Pol II-str", 
+            "Pol I-refed",
+            "Pol III-refed", 
+            "Pol III-str", 
+            "Pol I-str"
+        ],
+        "channel": "SDC405"
+    }
+    ,
+    "3_raga1_Daf15": {
+        "folder_path": "data/3_raga1_Daf15",
+        "experiments": [
+            "Daf-15-auxin",
+            "Daf-15-EtOH", 
+            "raga-1- no ring", 
+            "raga-1- ring"
+        ],
+        "channel": [
+            "SDC405",
+            "SDC405", 
+            "SDC405", 
+            "SDC405", 
+            "SDC405", 
+            "SDC488", 
+            "SDC488"
+        ]
+    }
+}

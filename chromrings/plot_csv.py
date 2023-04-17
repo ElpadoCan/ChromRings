@@ -10,10 +10,27 @@ import matplotlib.patches as mpatches
 # import diptest
 
 from chromrings import tables_path, core
+from chromrings import (
+    NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
+    exp_folder
+)
 
 import seaborn as sns
 
-df_summary_path = os.path.join(tables_path, 'profiles_summary.csv')
+NORMALISE_BY_MAX = False
+
+exp_foldername = '_'.join(exp_folder)
+filename_prefix = (
+    f'{exp_foldername}'
+    f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
+    f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
+    f'_norm_how_{NORMALISE_HOW}'
+)
+
+profiles_summary_filename = f'{filename_prefix}_profiles_summary.csv'
+
+df_summary_path = os.path.join(tables_path, profiles_summary_filename)
+
 df_summary = pd.read_csv(df_summary_path)
 
 
@@ -33,17 +50,21 @@ y = 'CV'
 sns.boxplot(x=x, y=y, data=df_summary, ax=ax[2])
 ax[2].set_title('CV of distance distribution')
 
+fig.suptitle(f'{filename_prefix}')
+
 plt.show()
 
 """Average profile starved vs fed"""
-df_profiles_fed_path = os.path.join(tables_path, 'profiles_fed.csv')
+df_profiles_fed_path = os.path.join(tables_path, f'{filename_prefix}_profiles_fed.csv')
 df_profiles_fed = pd.read_csv(df_profiles_fed_path, index_col='dist_perc')
-df_profiles_fed = df_profiles_fed / df_profiles_fed.max()
+if NORMALISE_BY_MAX:
+    df_profiles_fed = df_profiles_fed / df_profiles_fed.max()
 df_fed_average = df_profiles_fed.mean(axis=1).dropna()
 
-df_profiles_starved_path = os.path.join(tables_path, 'profiles_starved.csv')
+df_profiles_starved_path = os.path.join(tables_path, f'{filename_prefix}_profiles_starved.csv')
 df_profiles_starved = pd.read_csv(df_profiles_starved_path, index_col='dist_perc')
-df_profiles_starved = df_profiles_starved / df_profiles_starved.max()
+if NORMALISE_BY_MAX:
+    df_profiles_starved = df_profiles_starved / df_profiles_starved.max()
 df_starved_average = df_profiles_starved.mean(axis=1).dropna()
 
 fig, ax = plt.subplots(1, 3)
@@ -160,6 +181,9 @@ for i in range(len(xx_peaks_str)):
     s = f'  - Peak nr. {i+1} area ratio percentage = {ratio:.2f}%\n'
     info_str = f'{info_str}{s}'
 
+for axis in ax:
+    axis.set_xlabel('Distance from nucleolus center [percentage]')
+
 print(
     '===========================================================\n'
     'Starved:\n'
@@ -195,5 +219,7 @@ for s, label in enumerate(['fed', 'starved']):
     )
 
 fig.legend(handles=legend_handles, loc='center right')
+
+fig.suptitle(f'{filename_prefix}')
 
 plt.show()

@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import cv2
 from math import sqrt, pow
@@ -10,6 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+
+pwd_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_objContours(obj, obj_image=None, all=False):
     if all:
@@ -34,11 +38,52 @@ def get_objContours(obj, obj_image=None, all=False):
     return cont
 
 def radial_profiles(
-        lab, img_data, extra_radius=0, how='object', 
+        lab: np.ndarray, img_data: np.ndarray, 
+        extra_radius=0, how='object', 
         invert_intensities=True, resample_bin_size_perc=5,
         tqdm_kwargs=None, normalize_every_profile=True,
-        normalise_average_profile=False
+        normalise_how='max', normalise_average_profile=False, inspect=False
     ):
+    """Compute the radial profile of single-cells. The final profile is the 
+    average of all the possible profiles starting from weighted centroid to 
+    each point on the segmentation object's contour.
+
+    Parameters
+    ----------
+    lab : np.ndarray of ints
+        Segmentation labels arrat
+    img_data : np.ndarray
+        Intensity image
+    extra_radius : int, optional
+        Grow object by `extra_radius` before getting its contour, by default 0
+    how : str, optional
+        Controls whether the contour should be the object's contour 
+        (`how = 'object'`) or a  circle (`how = 'circle'`), by default 'object'
+    invert_intensities : bool, optional
+        Invert black/white levels in `img_data`, by default True
+    resample_bin_size_perc : int, optional
+        Bin size percentage of the distance from centroid to edge, by default 5
+    tqdm_kwargs : _type_, optional
+        Keyword arguments to pass to tqdm progress bar, by default None
+    normalize_every_profile : bool, optional
+        Normalise every single profile by its own max, by default True
+    normalise_average_profile : bool, optional
+        Normalise final profile by its own max, by default False
+    normalise_how : str, optional
+        Which function to use for normalisation of final average profile, 
+        either 'max' or 'sum', by default 'max'
+    inspect : bool, optional
+        Visualise partial results, by default False
+
+    Returns
+    -------
+    list of `skimage.measure.RegionProperties`
+        List of region properties. The additional properties computed by this 
+        function are `mean_radial_profile`, `radial_profile_argmean`, 
+        `radial_profile_argmax`, and `radial_profile_distr_std`.
+    """    
+    max_dtype = np.iinfo(img_data.dtype).max
+
     if tqdm_kwargs is None:
         tqdm_kwargs = {}
 
@@ -70,7 +115,7 @@ def radial_profiles(
         h, w = ymax-ymin, xmax-xmin 
         radius = round(max(h, w)/2 + sp)
 
-        if how == 'cirlce':
+        if how == 'circle':
             rr, cc = skimage.draw.circle_perimeter(
                 y1, x1, radius, shape=lab_2D.shape
             )
@@ -126,13 +171,17 @@ def radial_profiles(
 
             all_dist.update(dist_perc)
 
-            fig, ax = plt.subplots(1,2)
-            ax[0].imshow(img_data_2D)
-            ax[0].set_xlim((xmin-sp, xmax+sp))
-            ax[0].set_ylim((ymin-sp, ymax+sp))
-            ax[0].plot(xx_line, yy_line, 'r.')
-            ax[1].plot(dist_perc, vals)
-            plt.show()
+            if inspect:
+                fig, ax = plt.subplots(1,2, figsize=(16,8))
+                ax[0].imshow(img_data_2D)
+                ax[0].set_xlim((xmin-sp, xmax+sp))
+                ax[0].set_ylim((ymin-sp, ymax+sp))
+                ax[0].plot(xx_line, yy_line, 'r.')
+                ax[1].plot(dist_perc, vals)
+                figures_path = os.path.join(pwd_path, 'figures')
+                fig_path = os.path.join(figures_path, f'{r:02d}_profile.png')
+                fig.savefig(fig_path)
+                plt.show()
 
         if not resample_bin_size_perc > 0:
             obj.resampled_radial_profiles = obj.radial_profiles
@@ -140,17 +189,25 @@ def radial_profiles(
 
         cols = [f'value_{r}' for r in range(len(obj.resampled_radial_profiles))]
         obj.radial_df = pd.DataFrame(index=list(all_dist), columns=cols)
+        obj.radial_df['is_saturated'] = False
         for r, profile in enumerate(obj.resampled_radial_profiles):
             idx = profile['norm_dist']
             # obj.radial_df[f'value_{r}'] = np.nan
             obj.radial_df.loc[idx, f'value_{r}'] = profile['values']
+            is_saturated = np.max(profile['values']) == max_dtype
+            obj.radial_df['is_saturated'] = is_saturated
         
         obj.radial_df.sort_index(inplace=True)
 
-        obj.mean_radial_profile = obj.radial_df.mean(axis=1)
+        obj.mean_radial_profile = obj.radial_df[cols].mean(axis=1)
         obj.mean_radial_profile.name = f'ID_{obj.label}_mean_radial_profile'
         if normalise_average_profile:
-            obj.mean_radial_profile /= obj.mean_radial_profile.max()
+            if normalise_how == 'tot_fluo':
+                norm_value = img_data[obj.slice][obj.image].sum()
+            else:
+                norm_func = getattr(np, normalise_how)
+                norm_value = norm_func(obj.mean_radial_profile)     
+            obj.mean_radial_profile /= norm_value
 
         # fig, ax = plt.subplots(1,2)
         # ax[0].imshow(img_data_2D)
@@ -160,17 +217,18 @@ def radial_profiles(
         # plt.show()
 
         '''Describe mean_radial_profile distribution'''
-        x = obj.mean_radial_profile.index.values/100
-        obj.radial_profile_argmax = obj.mean_radial_profile.idxmax()/100
+        df_norm_distribution = obj.mean_radial_profile/obj.mean_radial_profile.max()
+        x = df_norm_distribution.index.values/100
+        obj.radial_profile_argmax = df_norm_distribution.idxmax()/100
 
-
-        tot_samples = obj.mean_radial_profile.values.sum()
-        frequency = obj.mean_radial_profile.values
+        tot_samples = df_norm_distribution.values.sum()
+        frequency = df_norm_distribution.values
         density = frequency/tot_samples
         obj.radial_profile_argmean = (density*x).sum()
         
         residuals = frequency*(np.square(x-obj.radial_profile_argmean))
         variance = np.sum(residuals)/(tot_samples-1)
+
         std = sqrt(variance)
         
         obj.radial_profile_distr_std = std
