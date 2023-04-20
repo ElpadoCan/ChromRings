@@ -21,9 +21,8 @@ from chromrings import (
 
 SAVE = True
 NORMALISE_BY_MAX = False
-PLOTS = ['Pol I-', 'raga-1', 'Pol III-', 'Daf-15']
 CI_METHOD = '95perc_standard_error' # 'min_max'
-batch_name = '3_Pol_I_III_raga1_Daf15'
+batch_name = '3_raga1_Daf15'
 
 filename_prefix = (
     f'{batch_name}'
@@ -44,6 +43,8 @@ df_profiles = pd.read_parquet(df_profiles).reset_index()
 with open(data_info_json_path, 'r') as json_file:
     data_info = json.load(json_file)
 
+figs = data_info['figs']
+plots = data_info["plots"]
 batch_info = data_info[batch_name]
 exp_foldernames = batch_info['experiments']
 
@@ -67,10 +68,10 @@ def clip_dist_perc_above_100(group):
         clipped.loc[clipped['dist_perc'] == 105, 'dist_perc'] = 100
     return clipped[['dist_perc', 'normalised_intensity']]
 
-for PLOT in PLOTS:
+for group_name in figs:
     plot_experiments = [
         exp_folder for exp_folder in exp_foldernames 
-        if exp_folder.startswith(PLOT)
+        if exp_folder.startswith(group_name)
     ]
     ncols = len(plot_experiments)
     nrows = 2
@@ -78,10 +79,11 @@ for PLOT in PLOTS:
     fig.subplots_adjust(
         left=0.06, bottom=0.05, right=0.95, top=0.95
     )
+    plots_group = plots.split()
     if ncols == 1:
         ax = ax[:, np.newaxis]
     for col, exp_folder in enumerate(plot_experiments):
-        if not exp_folder.startswith(PLOT):
+        if not exp_folder.startswith(group_name):
             continue
         
         """Heatmap"""

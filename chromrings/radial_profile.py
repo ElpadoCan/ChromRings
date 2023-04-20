@@ -11,8 +11,6 @@ import skimage.draw
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from math import cos, sin, pi
-
 from tqdm import tqdm
 
 from chromrings import (

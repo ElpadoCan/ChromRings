@@ -16,15 +16,13 @@ from acdctools.plot import heatmap
 from chromrings import tables_path, figures_path
 from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    data_info_json_path
+    data_info_json_path, batch_name
 )
 
 SAVE = True
 NORMALISE_BY_MAX = False
-PLOTS = ['']
-COLORS = ['firebrick', 'orangered', 'darkturquoise', 'royalblue']
-CI_METHOD = 'min_max' # '95perc_standard_error' # 'min_max'
-batch_name = '1_test_3D_vs_2D'
+COLORS = ['darkturquoise', 'orangered']
+CI_METHOD = '95perc_standard_error' # 'min_max'
 
 filename_prefix = (
     f'{batch_name}'
@@ -46,6 +44,8 @@ with open(data_info_json_path, 'r') as json_file:
     data_info = json.load(json_file)
 
 batch_info = data_info[batch_name]
+figs = batch_info['figs']
+plots = batch_info["plots"]
 exp_foldernames = batch_info['experiments']
 
 df_long = (
@@ -68,10 +68,10 @@ def clip_dist_perc_above_100(group):
         clipped.loc[clipped['dist_perc'] == 105, 'dist_perc'] = 100
     return clipped[['dist_perc', 'normalised_intensity']]
 
-for PLOT in PLOTS:
+for group_name in figs:
     plot_experiments = [
         exp_folder for exp_folder in exp_foldernames 
-        if exp_folder.startswith(PLOT)
+        if exp_folder.startswith(group_name)
     ]
     ncols = len(plot_experiments)
     nrows = 2
@@ -79,10 +79,18 @@ for PLOT in PLOTS:
     fig.subplots_adjust(
         left=0.06, bottom=0.05, right=0.95, top=0.95
     )
+    plots_group = [plot for plot in plots if plot.startswith(group_name)]
+    if len(plots_group) > 1:
+        flattened_plots = []
+        for plots_group_sub in plots_group:
+            flattened_plots.extend(plots_group_sub.split(';;'))
+        plots_group = flattened_plots
+    else:
+        plots_group = plots_group[0].split(';;')
     if ncols == 1:
         ax = ax[:, np.newaxis]
     for col, exp_folder in enumerate(plot_experiments):
-        if not exp_folder.startswith(PLOT):
+        if not exp_folder.startswith(group_name):
             continue
         
         """Heatmap"""
@@ -117,7 +125,9 @@ for PLOT in PLOTS:
         axis.set_yticks([])
 
         """Line plot"""
-        axis = ax[1, col]
+        agg_col = col // 2
+        color_idx = col % 2
+        axis = ax[1, agg_col]
         
         data = df_profiles.set_index('dist_perc')[exp_folder]
         data = data[data.index < 105]
@@ -132,40 +142,24 @@ for PLOT in PLOTS:
             data_y_low = (data_agg - 2*std_errs).values
             data_y_high = (data_agg + 2*std_errs).values
         
-        if exp_folder.find('str') != -1:
-            label = 'Starved'
-        else:
-            label = 'Fed'
-        
-        if exp_folder.find('2D') != -1:
-            linestyle = '--'
-            label = f'{label} (2D)'
-        else:
-            linestyle = '-'
-            label = f'{label} (3D)'
-        
-        line_color = COLORS[col]
-        line_plot_axis = ax[1, 0]
         # Plot at center of bin --> move left by 2.5
-        line_plot_axis.plot(
+        axis.plot(
             data_agg.index-2.5, data_agg.values, 
-            color=line_color,
-            linestyle=linestyle,
-            label=label
+            color=COLORS[color_idx], 
+            label=plots_group[col]
         )
-        line_plot_axis.fill_between(
+        axis.fill_between(
             data_agg.index-2.5, data_y_low,data_y_high, 
-            color=line_color,
-            alpha=0.3,
-            linestyle=linestyle,
+            color=COLORS[color_idx],
+            alpha=0.3
         )
-        line_plot_axis.set_xticks(np.arange(0,101,20))
-        line_plot_axis.set_ylim((0,1.05))
-        line_plot_axis.set_xlabel('Distance from nucleus center of mass (%)')
-        line_plot_axis.set_ylabel('Normalised mean intensity')
-        line_plot_axis.legend()
+        axis.legend()
+        axis.set_xticks(np.arange(0,101,20))
+        axis.set_ylim((0,1.05))
+        axis.set_xlabel('Distance from nucleus center of mass (%)')
+        axis.set_ylabel('Normalised mean intensity')
     
     if SAVE:
-        fig.savefig(os.path.join(figures_path, f'{batch_name}_{PLOT}.pdf'))
+        fig.savefig(os.path.join(figures_path, f'{batch_name}_{group_name}.pdf'))
 
 plt.show()

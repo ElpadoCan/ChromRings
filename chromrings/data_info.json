@@ -5,8 +5,13 @@
     },
     "1_test_3D_vs_2D": {
         "folder_path": "data/1_test_3D_vs_2D_01-02-2023",
-        "experiments": ["2D_seg/fed", "3D_seg/str", "2D_seg/fed", "3D_seg/fed"],
-        "channel": "SDC488"
+        "experiments": ["2D_seg/str", "3D_seg/str", "2D_seg/fed", "3D_seg/fed"],
+        "channel": "SDC488",
+        "plots": [
+            "2D_seg/str;;3D_seg/str",
+            "2D_seg/fed;;3D_seg/fed"
+        ],
+        "figs": [""]
     },
     "2_Pol_I_II": {
         "folder_path": "data/2_Pol_I_II_III",
@@ -24,25 +29,36 @@
             "Pol III-str", 
             "Pol I-str"
         ],
-        "channel": "SDC405"
+        "channel": "SDC405",
+        "plots": [
+            "Pol I-EtOH (control);;Pol I-auxin 3hrs",
+            "Pol II-EtOH (control);;Pol II-auxin 3hrs",
+            "Pol III-EtOH (control);;Pol III-auxin 3hrs",
+            "Pol I-refed (control);;Pol I-str",
+            "Pol II-refed (control);;Pol II-str",
+            "Pol III-refed (control);;Pol III-str"
+        ],
+        "figs": ["Pol I-", "Pol II-", "Pol III-"]
     }
     ,
     "3_raga1_Daf15": {
         "folder_path": "data/3_raga1_Daf15",
         "experiments": [
-            "Daf-15-auxin",
-            "Daf-15-EtOH", 
+            "Daf-15-EtOH",
+            "Daf-15-auxin", 
             "raga-1- no ring", 
             "raga-1- ring"
         ],
         "channel": [
             "SDC405",
             "SDC405", 
-            "SDC405", 
-            "SDC405", 
-            "SDC405", 
             "SDC488", 
             "SDC488"
-        ]
+        ],
+        "plots": [
+            "Daf-15-EtOH;;Daf-15-auxin",
+            "raga-1- no ring;;raga-1- ring"
+        ], 
+        "figs": ["raga-1", "Daf-15"]
     }
 }
