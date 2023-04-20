@@ -23,7 +23,7 @@ SAVE = True
 NORMALISE_BY_MAX = False
 PLOTS = ['']
 COLORS = ['firebrick', 'orangered', 'darkturquoise', 'royalblue']
-CI_METHOD = 'min_max' # '95perc_standard_error' # 'min_max'
+CI_METHOD = '95perc_standard_error' # '95perc_standard_error' # 'min_max'
 batch_name = '1_test_3D_vs_2D'
 
 filename_prefix = (
@@ -166,6 +166,6 @@ for PLOT in PLOTS:
         line_plot_axis.legend()
     
     if SAVE:
-        fig.savefig(os.path.join(figures_path, f'{batch_name}_{PLOT}.pdf'))
+        fig.savefig(os.path.join(figures_path, f'3D_vs_2D_str_vs_fed_combined.pdf'))
 
 plt.show()

@@ -11,43 +11,47 @@
             "2D_seg/str;;3D_seg/str",
             "2D_seg/fed;;3D_seg/fed"
         ],
-        "figs": [""]
+        "figs": [""], 
+        "colors": {
+            "2D_seg/str": "firebrick",
+            "3D_seg/str": "orangered",
+            "2D_seg/fed": "darkturquoise",
+            "3D_seg/fed": "royalblue"
+        }
     },
     "2_Pol_I_II": {
         "folder_path": "data/2_Pol_I_II_III",
         "experiments": [
-            "Pol I-auxin 3hrs", 
-            "Pol I-EtOH (control)", 
-            "Pol II-auxin 3hrs", 
-            "Pol II-EtOH (control)", 
-            "Pol III-auxin 3hrs", 
-            "Pol III-EtOH (control)", 
-            "Pol II-refed", 
-            "Pol II-str", 
-            "Pol I-refed",
-            "Pol III-refed", 
-            "Pol III-str", 
-            "Pol I-str"
+            "Pol I-auxin 3hrs", "Pol I-EtOH (control)", 
+            "Pol II-auxin 3hrs", "Pol II-EtOH (control)", 
+            "Pol III-auxin 3hrs", "Pol III-EtOH (control)", 
+            "Pol I-str", "Pol I-refed",
+            "Pol II-str", "Pol II-refed", 
+            "Pol III-str",  "Pol III-refed"
         ],
         "channel": "SDC405",
         "plots": [
-            "Pol I-EtOH (control);;Pol I-auxin 3hrs",
-            "Pol II-EtOH (control);;Pol II-auxin 3hrs",
-            "Pol III-EtOH (control);;Pol III-auxin 3hrs",
-            "Pol I-refed (control);;Pol I-str",
-            "Pol II-refed (control);;Pol II-str",
-            "Pol III-refed (control);;Pol III-str"
+            "Pol I-auxin 3hrs;;Pol I-EtOH (control)",
+            "Pol II-auxin 3hrs;;Pol II-EtOH (control)",
+            "Pol III-auxin 3hrs;;Pol III-EtOH (control)",
+            "Pol I-str;;Pol I-refed (control)",
+            "Pol II-str;;Pol II-refed (control)",
+            "Pol III-str;;Pol III-refed (control)"
         ],
-        "figs": ["Pol I-", "Pol II-", "Pol III-"]
+        "figs": ["Pol I-", "Pol II-", "Pol III-"], 
+        "colors": {
+            "auxin": "orangered",
+            "EtOH": "darkturquoise",
+            "-str": "orangered",
+            "-refed": "darkturquoise"
+        }
     }
     ,
     "3_raga1_Daf15": {
         "folder_path": "data/3_raga1_Daf15",
         "experiments": [
-            "Daf-15-EtOH",
-            "Daf-15-auxin", 
-            "raga-1- no ring", 
-            "raga-1- ring"
+            "Daf-15-auxin", "Daf-15-EtOH", 
+            "raga-1- ring", "raga-1- no ring"
         ],
         "channel": [
             "SDC405",
@@ -59,6 +63,12 @@
             "Daf-15-EtOH;;Daf-15-auxin",
             "raga-1- no ring;;raga-1- ring"
         ], 
-        "figs": ["raga-1", "Daf-15"]
+        "figs": ["raga-1", "Daf-15"], 
+        "colors": {
+            "auxin": "orangered",
+            "EtOH": "darkturquoise",
+            "- no ring": "darkturquoise",
+            "- ring": "orangered"
+        }
     }
 }

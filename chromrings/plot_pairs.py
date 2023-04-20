@@ -21,7 +21,6 @@ from chromrings import (
 
 SAVE = True
 NORMALISE_BY_MAX = False
-COLORS = ['darkturquoise', 'orangered']
 CI_METHOD = '95perc_standard_error' # 'min_max'
 
 filename_prefix = (
@@ -47,6 +46,7 @@ batch_info = data_info[batch_name]
 figs = batch_info['figs']
 plots = batch_info["plots"]
 exp_foldernames = batch_info['experiments']
+colors = batch_info['colors']
 
 df_long = (
     pd.melt(df_profiles, id_vars=['dist_perc'])
@@ -80,7 +80,9 @@ for group_name in figs:
         left=0.06, bottom=0.05, right=0.95, top=0.95
     )
     plots_group = [plot for plot in plots if plot.startswith(group_name)]
+    plots_pairs = plots_group.copy()
     if len(plots_group) > 1:
+        # Split pairs
         flattened_plots = []
         for plots_group_sub in plots_group:
             flattened_plots.extend(plots_group_sub.split(';;'))
@@ -126,7 +128,10 @@ for group_name in figs:
 
         """Line plot"""
         agg_col = col // 2
-        color_idx = col % 2
+        for key, color in colors.items():
+            if exp_folder.find(key) != -1:
+                break
+
         axis = ax[1, agg_col]
         
         data = df_profiles.set_index('dist_perc')[exp_folder]
@@ -142,16 +147,22 @@ for group_name in figs:
             data_y_low = (data_agg - 2*std_errs).values
             data_y_high = (data_agg + 2*std_errs).values
         
+        linestyle = '-'
+        if exp_folder.find('3D_seg') != -1:
+            linestyle = '--'
+        
         # Plot at center of bin --> move left by 2.5
         axis.plot(
             data_agg.index-2.5, data_agg.values, 
-            color=COLORS[color_idx], 
-            label=plots_group[col]
+            color=color, 
+            label=exp_folder,
+            linestyle=linestyle
         )
         axis.fill_between(
             data_agg.index-2.5, data_y_low,data_y_high, 
-            color=COLORS[color_idx],
-            alpha=0.3
+            color=color,
+            alpha=0.3,
+            linestyle=linestyle
         )
         axis.legend()
         axis.set_xticks(np.arange(0,101,20))

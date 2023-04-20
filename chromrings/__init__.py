@@ -37,4 +37,4 @@ NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo'
 
-batch_name = '3_raga1_Daf15' # '1_test_3D_vs_2D' # '3_raga1_Daf15' # '2_Pol_I_II'
+batch_name = '1_test_3D_vs_2D' # '1_test_3D_vs_2D' # '3_raga1_Daf15' # '2_Pol_I_II'
