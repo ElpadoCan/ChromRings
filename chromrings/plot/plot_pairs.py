@@ -18,6 +18,7 @@ from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     data_info_json_path, batch_name
 )
+from chromrings.core import keep_last_point_less_nans
 
 SAVE = True
 NORMALISE_BY_MAX = False
@@ -135,7 +136,7 @@ for group_name in figs:
         axis = ax[1, agg_col]
         
         data = df_profiles.set_index('dist_perc')[exp_folder]
-        data = data[data.index < 105]
+        data = keep_last_point_less_nans(data)
         data_agg = data.mean(axis=1)
         if CI_METHOD =='min_max':
             data_y_low = data.min(axis=1).values

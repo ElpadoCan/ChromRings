@@ -307,3 +307,15 @@ class PeaksModel:
 
             n += 3
         return Is_foregr.sum(), Is_tot.sum(), Is_foregr, Is_tot
+
+def keep_last_point_less_nans(df_group):
+    if 105 in df_group.index and 100 in df_group.index:
+        count_nan_105 = df_group.loc[105].isna().sum()
+        count_nan_100 = df_group.loc[100].isna().sum()
+        drop_idx = 105 if count_nan_105 >= count_nan_100 else 100
+        df_group = df_group.drop(index=drop_idx)
+        if drop_idx == 100:
+            df_group = df_group.rename({105: 100})
+    elif 105 in df.index:
+        df_group = df_group.rename({105: 100})
+    return df_group

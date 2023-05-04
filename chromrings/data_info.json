@@ -45,8 +45,7 @@
             "-str": "orangered",
             "-refed": "darkturquoise"
         }
-    }
-    ,
+    },
     "3_raga1_Daf15": {
         "folder_path": "data/3_raga1_Daf15",
         "experiments": [
@@ -69,6 +68,74 @@
             "EtOH": "darkturquoise",
             "- no ring": "darkturquoise",
             "- ring": "orangered"
+        }
+    },
+    "4_WT_refed": {
+        "folder_path": "data/4_WT_refed",
+        "experiments": [
+            "WT-5min refed", "WT-30min refed"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "WT-5min refed;;WT-30min refed"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "5min refed": "darkturquoise",
+            "30min refed": "royalblue"
+        }
+    },
+    "5_WT_starved_DNA_vs_histone": {
+        "folder_path": "data/5_WT_starved_DNA_vs_histone",
+        "experiments": [
+            "WT starved-DNA", "WT starved-histone"
+        ],
+        "channel": [
+            "SDC405", "w1SDC488"
+        ],
+        "plots": [
+            "WT starved-DNA;;WT starved-histone"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "WT starved-DNA": "darkturquoise",
+            "WT starved-histone": "royalblue"
+        }
+    },
+    "6_WT_fed_DNA_vs_histone": {
+        "folder_path": "data/6_WT_fed_DNA_vs_histone",
+        "experiments": [
+            "WT fed-DNA", "WT fed-his"
+        ],
+        "channel": [
+            "SDC405", "w1SDC488"
+        ],
+        "plots": [
+            "WT fed-DNA;;WT fed-his"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "WT fed-DNA": "darkturquoise",
+            "WT fed-his": "royalblue"
+        }
+    },
+    "7_WT_starved_vs_fed_histone": {
+        "folder_path": "data/7_WT_starved_vs_fed_histone",
+        "experiments": [
+            "WT fed-his", "WT starved-his"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "WT fed-his;;WT starved-his"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "WT fed-his": "darkturquoise",
+            "WT starved-his": "royalblue"
         }
     }
 }
