@@ -23,21 +23,25 @@ from chromrings.core import keep_last_point_less_nans
 SAVE = False
 NORMALISE_BY_MAX = False
 CI_METHOD = '95perc_standard_error' # 'min_max'
-FED_DATASET = '7_WT_starved_vs_fed_histone' # '1_test_3D_vs_2D'
-FED_EXP_FOLDER = 'WT fed-his' # '2D_seg/fed'
-STR_EXP_FOLDER = 'WT starved-his' # '2D_seg/str'
+PDF_FILENAME = '6_WT_starved_vs_fed_histone.pdf'
 
-filename_prefix_refed = (
-    f'4_WT_refed'
+STR_DATASET = '5_WT_starved_DNA_vs_histone' # '1_test_3D_vs_2D'
+STR_EXP_FOLDER = 'WT starved-histone' # '2D_seg/str'
+
+filename_prefix_str = (
+    f'{STR_DATASET}'
     f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
     f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
     f'_norm_how_{NORMALISE_HOW}'
 )
 
-profiles_filename = f'{filename_prefix_refed}_profiles.parquet'
+profiles_filename = f'{filename_prefix_str}_profiles.parquet'
 
-df_profiles_path_refed = os.path.join(tables_path, profiles_filename)
-df_profiles_refed = pd.read_parquet(df_profiles_path_refed).reset_index()
+df_profiles_path_str = os.path.join(tables_path, profiles_filename)
+df_profiles_str = pd.read_parquet(df_profiles_path_str).reset_index()
+
+FED_DATASET = '6_WT_fed_DNA_vs_histone' # '1_test_3D_vs_2D'
+FED_EXP_FOLDER = 'WT fed-his' # '2D_seg/str'
 
 filename_prefix_fed = (
     f'{FED_DATASET}'
@@ -54,33 +58,21 @@ df_profiles_fed = pd.read_parquet(df_profiles_path_fed).reset_index()
 fed_plot = {
     'exp_folder': FED_EXP_FOLDER,
     'color': 'royalblue',
-    'label': 'Fed',
+    'label': 'Fed (histone)',
     'df': df_profiles_fed
-}
-refed_30min_plot = {
-    'exp_folder': 'WT-30min refed',
-    'color': 'darkturquoise',
-    'label': 'Re-fed (30 min)',
-    'df': df_profiles_refed
-}
-refed_5min_plot = {
-    'exp_folder': 'WT-5min refed',
-    'color': 'deeppink',
-    'label': 'Re-fed (5 min)',
-    'df': df_profiles_refed
 }
 str_plot = {
     'exp_folder': STR_EXP_FOLDER,
     'color': 'orangered',
-    'label': 'Starved',
-    'df': df_profiles_fed
+    'label': 'Starved (histone)',
+    'df': df_profiles_str
 }
 
 fig, ax = plt.subplots(figsize=(6,5))
 fig.subplots_adjust(
     left=0.1, bottom=0.1, right=0.95, top=0.95
 )
-plots = [fed_plot, refed_30min_plot, refed_5min_plot, str_plot]
+plots = [fed_plot, str_plot]
 for plot_kwargs in plots:
     df = plot_kwargs['df']
     exp_folder = plot_kwargs['exp_folder']
@@ -118,6 +110,6 @@ ax.set_xlabel('Distance from nucleus center of mass (%)')
 ax.set_ylabel('Normalised mean intensity')
 
 if SAVE:
-    fig.savefig(os.path.join(figures_path, f'4_WT_str_refed_fed.pdf'))
+    fig.savefig(os.path.join(figures_path, PDF_FILENAME))
 
 plt.show()

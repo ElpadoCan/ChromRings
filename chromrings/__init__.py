@@ -37,5 +37,7 @@ NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo'
 
-# '5_WT_starved_DNA_vs_histone', '4_WT_refed' # '1_test_3D_vs_2D' # '3_raga1_Daf15' # '2_Pol_I_II'
-batch_name = '4_WT_refed' 
+# '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
+# '5_WT_starved_DNA_vs_histone', '4_WT_refed'
+# '3_raga1_Daf15' '2_Pol_I_II', '1_test_3D_vs_2D' 
+batch_name = '5_WT_starved_DNA_vs_histone' 

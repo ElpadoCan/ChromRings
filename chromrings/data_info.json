@@ -100,8 +100,8 @@
         ], 
         "figs": [""], 
         "colors": {
-            "WT starved-DNA": "darkturquoise",
-            "WT starved-histone": "royalblue"
+            "WT starved-DNA": "deeppink",
+            "WT starved-histone": "orangered"
         }
     },
     "6_WT_fed_DNA_vs_histone": {
@@ -134,8 +134,8 @@
         ], 
         "figs": [""], 
         "colors": {
-            "WT fed-his": "darkturquoise",
-            "WT starved-his": "royalblue"
+            "WT fed-his": "royalblue",
+            "WT starved-his": "orangered"
         }
     }
 }
