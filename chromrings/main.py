@@ -16,11 +16,17 @@ from tqdm import tqdm
 from chromrings import (
     data_path, core, utils, tables_path, data_info_json_path,
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    batch_name
+    batch_name, USE_ABSOLUTE_DIST
 )
 
 SAVE = True
-INSPECT = False
+INSPECT_SINGLE_PROFILES = False
+INSPECT_MEAN_PROFILE = False
+
+if not USE_ABSOLUTE_DIST:
+    resample_bin_size_dist = 5
+else:
+    resample_bin_size_dist = 1
 
 with open(data_info_json_path, 'r') as json_file:
     data_info = json.load(json_file)
@@ -43,7 +49,30 @@ answer = input(
 if answer.lower() == 'n':
     exit('Execution stopped')
 
+if not SAVE:
+    while True:
+        answer = input(
+            'Are you sure you do not want to SAVE? '
+            '1) Yes, do NOT save. 2) No, DO save. q) Quit. : '
+        )
+        if answer.lower() == 'q':
+            exit('Execution stopped by the user.')
+        elif answer == '1':
+            SAVE = False
+            break
+        elif answer == '2':
+            SAVE = True
+            break
+        else:
+            print(
+                f'{answer} is not a valid answer. '
+                'Enter 1 or 2 to chosse an option or q to quit.'
+            )
+
 batch_dfs = []
+batch_dfs_skew = []
+batch_dfs_CV = []
+batch_dfs_std = []
 
 all_profiles_summary_df = []
 keys = []
@@ -62,9 +91,12 @@ for e, exp_folder in enumerate(exp_foldernames):
         images_path = os.path.join(exp_path, position_n, 'Images')
         segm_filename = None
         image_filename = None
+        nucleolus_segm_filename = None
         for file in utils.listdir(images_path):
             if file.endswith(f'{channel}.tif'):
                 image_filename = file
+            elif file.endswith('segm_nucleolus.npz'):
+                nucleolus_segm_filename = file
             elif file.find('_segm_') != -1 and file.endswith('.npz'):
                 segm_filename = file
             elif file.endswith('segm.npz'):
@@ -82,6 +114,13 @@ for e, exp_folder in enumerate(exp_foldernames):
                 'The following experiment does not have a the file ending with '
                 f'"segm.npz": "{images_path}"'
             )
+        if nucleolus_segm_filename is None:
+            nucleolus_segm_data = None
+        else:
+            nucleolus_segm_filepath = os.path.join(
+                images_path, nucleolus_segm_filename
+            )
+            nucleolus_segm_data = np.load(nucleolus_segm_filepath)['frame_0']
 
         segm_filepath = os.path.join(images_path, segm_filename)
         image_filepath = os.path.join(images_path, image_filename)
@@ -93,22 +132,31 @@ for e, exp_folder in enumerate(exp_foldernames):
             segm_data, img_data, 
             how='object', 
             invert_intensities=True, 
-            resample_bin_size_perc=5,
+            resample_bin_size_dist=resample_bin_size_dist,
             extra_radius=0,
             tqdm_kwargs={'position': 2, 'leave': False, 'ncols': 100},
             normalize_every_profile=NORMALIZE_EVERY_PROFILE,
             normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
             normalise_how=NORMALISE_HOW,
-            inspect=INSPECT
+            inpsect_single_profiles=INSPECT_SINGLE_PROFILES,
+            inpsect_mean_profile=INSPECT_MEAN_PROFILE,
+            inner_lab=nucleolus_segm_data,
+            use_absolute_dist=USE_ABSOLUTE_DIST
         )
 
         IDs = []
         argmeans = []
         argmaxs = []
         obj_series = []
+        obj_series_skew = []
+        obj_series_CV = []
+        obj_series_std = []
         stds = []
         for obj in rp:
-            obj_series.append(obj.mean_radial_profile)                
+            obj_series.append(obj.mean_radial_profile)    
+            obj_series_skew.append(obj.skews_radial_profile) 
+            obj_series_CV.append(obj.CVs_radial_profile)  
+            obj_series_std.append(obj.stds_radial_profile)           
             IDs.append(obj.label)
             argmeans.append(obj.radial_profile_argmean)
             argmaxs.append(obj.radial_profile_argmax)
@@ -117,6 +165,18 @@ for e, exp_folder in enumerate(exp_foldernames):
         df_profile = pd.concat(obj_series, axis=1)
         df_profile.index.name = 'dist_perc'
         batch_dfs.append(df_profile)
+        
+        df_profile_CV = pd.concat(obj_series_CV, axis=1)
+        df_profile_CV.index.name = 'dist_perc'
+        batch_dfs_CV.append(df_profile_CV)
+        
+        df_profile_skew = pd.concat(obj_series_skew, axis=1)
+        df_profile_skew.index.name = 'dist_perc'
+        batch_dfs_skew.append(df_profile_skew)
+        
+        df_profile_std = pd.concat(obj_series_std, axis=1)
+        df_profile_std.index.name = 'dist_perc'
+        batch_dfs_std.append(df_profile_std)
 
         summary_df = pd.DataFrame({
             'ID': IDs, 
@@ -148,6 +208,15 @@ main_pbar.close()
 batch_df_profile = pd.concat(batch_dfs, axis=1, keys=keys)
 batch_df_profile.index.name = 'dist_perc'
 
+batch_df_profile_skew = pd.concat(batch_dfs_skew, axis=1, keys=keys)
+batch_df_profile_skew.index.name = 'dist_perc'
+
+batch_df_profile_CV = pd.concat(batch_dfs_CV, axis=1, keys=keys)
+batch_df_profile_CV.index.name = 'dist_perc'
+
+batch_df_profile_std = pd.concat(batch_dfs_std, axis=1, keys=keys)
+batch_df_profile_std.index.name = 'dist_perc'
+
 final_df_summary = pd.concat(
     all_profiles_summary_df, keys=keys, 
     names=[*[f'folder_level_{i}' for i in range(len(keys[0]))], 'Cell_ID']
@@ -159,11 +228,31 @@ filename_prefix = (
     f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
     f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
     f'_norm_how_{NORMALISE_HOW}'
+    f'_absolut_dist_{USE_ABSOLUTE_DIST}'
+)
+
+filename_prefix_skew = filename_prefix.replace(
+    'norm_mean_profile', 'norm_skew_profile'
+)
+filename_prefix_CV = filename_prefix.replace(
+    'norm_mean_profile', 'norm_CV_profile'
+)
+filename_prefix_std = filename_prefix.replace(
+    'norm_mean_profile', 'norm_std_profile'
 )
 
 if SAVE:
     df_profile_path = os.path.join(tables_path, f'{filename_prefix}_profiles.parquet')
     batch_df_profile.to_parquet(df_profile_path)
+    
+    df_profile_path_skew = os.path.join(tables_path, f'{filename_prefix_skew}_profiles.parquet')
+    batch_df_profile_skew.to_parquet(df_profile_path_skew)
+    
+    df_profile_path_CV = os.path.join(tables_path, f'{filename_prefix_CV}_profiles.parquet')
+    batch_df_profile_CV.to_parquet(df_profile_path_CV)
+    
+    df_profile_path_std = os.path.join(tables_path, f'{filename_prefix_std}_profiles.parquet')
+    batch_df_profile_std.to_parquet(df_profile_path_std)
 
     print(f'Profiles saved to "{df_profile_path}"')
 

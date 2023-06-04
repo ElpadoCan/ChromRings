@@ -40,9 +40,11 @@ def get_objContours(obj, obj_image=None, all=False):
 def radial_profiles(
         lab: np.ndarray, img_data: np.ndarray, 
         extra_radius=0, how='object', 
-        invert_intensities=True, resample_bin_size_perc=5,
+        invert_intensities=True, resample_bin_size_dist=5,
         tqdm_kwargs=None, normalize_every_profile=True,
-        normalise_how='max', normalise_average_profile=False, inspect=False
+        normalise_how='max', normalise_average_profile=False, 
+        inpsect_single_profiles=False, inpsect_mean_profile=False,
+        inner_lab=None, use_absolute_dist=False
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -61,9 +63,9 @@ def radial_profiles(
         (`how = 'object'`) or a  circle (`how = 'circle'`), by default 'object'
     invert_intensities : bool, optional
         Invert black/white levels in `img_data`, by default True
-    resample_bin_size_perc : int, optional
+    resample_bin_size_dist : int, optional
         Bin size percentage of the distance from centroid to edge, by default 5
-    tqdm_kwargs : _type_, optional
+    tqdm_kwargs : dict, optional
         Keyword arguments to pass to tqdm progress bar, by default None
     normalize_every_profile : bool, optional
         Normalise every single profile by its own max, by default True
@@ -72,8 +74,16 @@ def radial_profiles(
     normalise_how : str, optional
         Which function to use for normalisation of final average profile, 
         either 'max' or 'sum', by default 'max'
-    inspect : bool, optional
+    inpsect_single_profiles : bool, optional
         Visualise partial results, by default False
+    inpsect_mean_profile : bool, optional
+        Visualise mean profile, by default False
+    inner_lab : np.ndarray, optional
+        Optional inner segmentation labels, by default None. 
+        If provided, it will be used to determine that 0% of the profile, 
+        i.e., the outer edge of the object.
+    use_absolute_dist : bool, optional
+        Do not use percentage distances, by default False
 
     Returns
     -------
@@ -95,13 +105,32 @@ def radial_profiles(
         intensity_image = img_data
     rp = skimage.measure.regionprops(lab, intensity_image=intensity_image)
 
+    if inner_lab is not None:
+        inner_lab_masked = np.zeros_like(lab)
+
     for obj in tqdm(rp, desc='Computing radiant profiles', **tqdm_kwargs):
-        weighted_centroid = obj.weighted_centroid
+        if inner_lab is None:
+            weighted_centroid = obj.weighted_centroid
+        else:
+            inner_masked = inner_lab[obj.slice][obj.image]
+            inner_masked = inner_masked[inner_masked>0]
+            inner_ids, inner_count = np.unique(
+                inner_masked, return_counts=True
+            )
+            max_count_idx = inner_count.argmax()    
+            inner_id = inner_ids[max_count_idx]
+            inner_lab_masked[:] = 0
+            inner_lab_masked[inner_lab == inner_id] = obj.label
+            inner_obj = skimage.measure.regionprops(inner_lab_masked)[0]
+            weighted_centroid = inner_obj.centroid       
+        
         if len(weighted_centroid) == 3:
             zc, yc, xc = weighted_centroid
             lab_2D = lab.copy()
             lab_2D[lab_2D != obj.label] = 0
             lab_2D = lab_2D[round(zc)]
+            if inner_lab is not None:
+                inner_lab_2D = inner_lab_masked[round(zc)]
             obj_z = skimage.measure.regionprops(lab_2D)[0]
             img_data_2D = img_data[round(zc)]
         else:
@@ -109,6 +138,8 @@ def radial_profiles(
             obj_z = obj
             lab_2D = lab
             img_data_2D = img_data
+            if inner_lab is not None:
+                inner_lab_2D = inner_lab_masked
         
         x1, y1 = round(xc), round(yc)
         ymin, xmin, ymax, xmax = obj_z.bbox
@@ -134,6 +165,15 @@ def radial_profiles(
             # ax.plot(cc, rr)
             # plt.show()
             # import pdb; pdb.set_trace()
+        
+        if inner_lab is not None:
+            inner_obj_2D = skimage.measure.regionprops(inner_lab_2D)[0]
+            inner_contour = get_objContours(inner_obj_2D)
+            inner_contours_lab = np.zeros(inner_lab_2D.shape, dtype=np.uint32)
+            rr1 = np.arange(1, len(inner_contour)+1)
+            rr2 = rr1 + rr1.max()
+            inner_contours_lab[inner_contour[:,1], inner_contour[:,0]] = rr1
+            inner_contours_lab[inner_contour[:,1], inner_contour[:,0]-1] = rr2
 
         obj.radial_profiles = []
         obj.resampled_radial_profiles = []
@@ -141,49 +181,78 @@ def radial_profiles(
         for r, (y2, x2) in enumerate(zip(rr, cc)):
             yy_line, xx_line = skimage.draw.line(y1, x1, y2, x2)
             vals = img_data_2D[yy_line, xx_line]
-
+            if inner_lab is not None:
+                inner_vals = inner_contours_lab[yy_line, xx_line]
+                try:
+                    inner_val = inner_vals[inner_vals>0][0]
+                except Exception as e:
+                    fig, ax = plt.subplots()
+                    ax.imshow(inner_contours_lab)
+                    ax.plot(xx_line, yy_line)
+                    plt.show()
+                    import pdb; pdb.set_trace()
+                inner_yy, inner_xx = np.where(inner_contours_lab == inner_val)
+                inner_y, inner_x = inner_yy[0], inner_xx[0]
+                
             # Normalize distance to object edge
-            full_dist = sqrt(pow(y2-y1, 2) + pow(x2-x1, 2))
-            dist_100 = full_dist - extra_radius
-            diff = np.subtract(np.column_stack((xx_line, yy_line)), (x1, y1))
-            dist = np.linalg.norm(diff, axis=1)/dist_100
-            dist_perc = np.round(dist*100).astype(int)
+            if inner_lab is not None:
+                y0, x0 = inner_y, inner_x
+            else:
+                y0, x0 = y1, x1
+            xy_arr = np.column_stack((xx_line, yy_line))
+            diff = np.subtract(xy_arr, (x0, y0))
+            dist = np.linalg.norm(diff, axis=1)
+            zero_dist_idx = dist.argmin()
+            if not use_absolute_dist:
+                full_dist = sqrt(pow(y2-y0, 2) + pow(x2-x0, 2))
+                dist_100 = full_dist - extra_radius
+                dist = dist/dist_100
+                dist_perc = np.round(dist*100).astype(int)
+            else:
+                dist_perc = np.round(dist).astype(int)
+            
+            dist_perc[:zero_dist_idx] *= - 1
             obj.radial_profiles.append(
-                {'x': xx_line, 'y': yy_line, 'values': vals, 'norm_dist': dist_perc}
+                {'x': xx_line, 'y': yy_line, 'values': vals, 
+                 'norm_dist': dist_perc}
             )
 
             if normalize_every_profile:
                 vals = vals/vals.max()
             
-            if resample_bin_size_perc > 0:
+            if resample_bin_size_dist > 0:
                 _df = pd.DataFrame(
                         {'dist_perc': dist_perc, 'value': vals}
                     ).set_index('dist_perc')
                 
                 _df.index = pd.to_datetime(_df.index)
-                rs = f'{resample_bin_size_perc}ns'
+                rs = f'{resample_bin_size_dist}ns'
                 resampled = _df.resample(rs, label='right').mean().dropna()
                 dist_perc = resampled.index.astype(np.int64)
                 obj.resampled_radial_profiles.append(
-                    {'values': resampled['value'].values, 'norm_dist': dist_perc}
+                    {'values': resampled['value'].values, 
+                     'norm_dist': dist_perc}
                 )
                 vals = resampled['value'].values
 
             all_dist.update(dist_perc)
 
-            if inspect:
+            if inpsect_single_profiles:
                 fig, ax = plt.subplots(1,2, figsize=(16,8))
                 ax[0].imshow(img_data_2D)
                 ax[0].set_xlim((xmin-sp, xmax+sp))
                 ax[0].set_ylim((ymin-sp, ymax+sp))
+                if inner_lab is not None:
+                    ax[0].plot(inner_contour[:,0], inner_contour[:,1], 'r')
                 ax[0].plot(xx_line, yy_line, 'r.')
                 ax[1].plot(dist_perc, vals)
                 figures_path = os.path.join(pwd_path, 'figures')
                 fig_path = os.path.join(figures_path, f'{r:02d}_profile.png')
                 fig.savefig(fig_path)
                 plt.show()
+                import pdb; pdb.set_trace()
 
-        if not resample_bin_size_perc > 0:
+        if not resample_bin_size_dist > 0:
             obj.resampled_radial_profiles = obj.radial_profiles
 
 
@@ -200,7 +269,17 @@ def radial_profiles(
         obj.radial_df.sort_index(inplace=True)
 
         obj.mean_radial_profile = obj.radial_df[cols].mean(axis=1)
+        obj.stds_radial_profile = obj.radial_df[cols].std(axis=1)
+        obj.CVs_radial_profile = (
+            (obj.stds_radial_profile/obj.mean_radial_profile)
+            .replace(np.inf, np.nan)
+        )
+        obj.skews_radial_profile = obj.radial_df[cols].skew(axis=1)
+        
         obj.mean_radial_profile.name = f'ID_{obj.label}_mean_radial_profile'
+        obj.stds_radial_profile.name = f'ID_{obj.label}_CV_radial_profile'
+        obj.CVs_radial_profile.name = f'ID_{obj.label}_std_radial_profile'
+        obj.skews_radial_profile.name = f'ID_{obj.label}_skew_radial_profile'
         if normalise_average_profile:
             if normalise_how == 'tot_fluo':
                 norm_value = img_data[obj.slice][obj.image].sum()
@@ -209,12 +288,28 @@ def radial_profiles(
                 norm_value = norm_func(obj.mean_radial_profile)     
             obj.mean_radial_profile /= norm_value
 
-        # fig, ax = plt.subplots(1,2)
-        # ax[0].imshow(img_data_2D)
-        # ax[0].set_xlim((xmin-sp, xmax+sp))
-        # ax[0].set_ylim((ymin-sp, ymax+sp))
-        # ax[1].plot(obj.mean_radial_profile.index, obj.mean_radial_profile.values)
-        # plt.show()
+        profile_series = (
+            obj.stds_radial_profile, obj.CVs_radial_profile, 
+            obj.skews_radial_profile
+        )
+        for series_profile in (profile_series):
+            norm_func = getattr(np, normalise_how)
+            norm_value = norm_func(series_profile)
+            series_profile /= norm_value
+        
+        if inpsect_mean_profile:
+            print('')
+            print(obj.mean_radial_profile)
+            fig, ax = plt.subplots(1,2)
+            ax[0].imshow(img_data_2D)
+            ax[0].set_xlim((xmin-sp, xmax+sp))
+            ax[0].set_ylim((ymin-sp, ymax+sp))
+            if inner_lab is not None:
+                ax[0].plot(inner_contour[:,0], inner_contour[:,1], 'r')
+            ax[0].plot([x1], [y1], 'r.')
+            ax[1].plot(obj.mean_radial_profile.index, obj.mean_radial_profile.values)
+            plt.show()
+            import pdb; pdb.set_trace()
 
         '''Describe mean_radial_profile distribution'''
         df_norm_distribution = obj.mean_radial_profile/obj.mean_radial_profile.max()
@@ -316,6 +411,6 @@ def keep_last_point_less_nans(df_group):
         df_group = df_group.drop(index=drop_idx)
         if drop_idx == 100:
             df_group = df_group.rename({105: 100})
-    elif 105 in df.index:
+    elif 105 in df_group.index:
         df_group = df_group.rename({105: 100})
     return df_group

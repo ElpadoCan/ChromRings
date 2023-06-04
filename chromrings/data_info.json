@@ -46,28 +46,19 @@
             "-refed": "darkturquoise"
         }
     },
-    "3_raga1_Daf15": {
-        "folder_path": "data/3_raga1_Daf15",
+    "3_Daf15": {
+        "folder_path": "data/3_Daf15",
         "experiments": [
-            "Daf-15-auxin", "Daf-15-EtOH", 
-            "raga-1- ring", "raga-1- no ring"
+            "Daf-15-auxin", "Daf-15-EtOH"
         ],
-        "channel": [
-            "SDC405",
-            "SDC405", 
-            "SDC488", 
-            "SDC488"
-        ],
+        "channel": ["SDC405", "SDC405"],
         "plots": [
-            "Daf-15-EtOH;;Daf-15-auxin",
-            "raga-1- no ring;;raga-1- ring"
+            "Daf-15-EtOH;;Daf-15-auxin"
         ], 
-        "figs": ["raga-1", "Daf-15"], 
+        "figs": ["Daf-15"], 
         "colors": {
             "auxin": "orangered",
-            "EtOH": "darkturquoise",
-            "- no ring": "darkturquoise",
-            "- ring": "orangered"
+            "EtOH": "darkturquoise"
         }
     },
     "4_WT_refed": {
@@ -136,6 +127,144 @@
         "colors": {
             "WT fed-his": "royalblue",
             "WT starved-his": "orangered"
+        }
+    },
+    "8_raga1_all_categories": {
+        "folder_path": "data/8_raga1_all_categories",
+        "experiments": [
+            "raga-1- all catagories",
+            "WT starved-his_raga_control"
+        ],
+        "channel": ["w1SDC488", "w1SDC488"],
+        "plots": [
+            "raga-1- all catagories;WT starved-his_raga_control"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "raga-1- all catagories": "darkturquoise",
+            "WT starved-his_raga_control": "orangered"
+        }
+    },
+    "9_raga1": {
+        "folder_path": "data/9_raga1",
+        "experiments": [
+            "raga-1- no ring",
+            "raga-1- partial rings",
+            "raga-1- ring",
+            "WT starved-his_raga_control"
+        ],
+        "channel": ["w1SDC488", "w1SDC488", "w1SDC488", "w1SDC488"],
+        "plots": [
+            "raga-1- partial rings;;raga-1- no ring;;raga-1- ring;;WT starved-his_raga_control"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "raga-1- partial rings": "darkturquoise",
+            "- no ring": "royalblue",
+            "- ring": "deeppink",
+            "WT starved-his_raga_control": "orangered"
+        }
+    },
+    "10_Tir_1": {
+        "folder_path": "data/10_Tir-1",
+        "experiments": [
+            "Tir-1-refed", "Tir-1-str"
+        ],
+        "channel": [
+            "SDC405", "SDC405"
+        ],
+        "plots": [
+            "Tir-1-refed;;Tir-1-str"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Tir-1-refed": "royalblue",
+            "Tir-1-str": "orangered"
+        }
+    },
+    "11_hypoderm": {
+        "folder_path": "data/11_hypoderm",
+        "experiments": [
+            "hypoderm-fed", "hypoderm-str"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "hypoderm-fed;;hypoderm-str"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "hypoderm-str": "orangered",
+            "hypoderm-fed": "royalblue"
+        }
+    },
+    "12_adults": {
+        "folder_path": "data/12_adults",
+        "experiments": [
+            "adults-fed-his", "adults-starved-his"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "adults-starved-his;;adults-fed-his"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "adults-starved-his": "orangered",
+            "adults-fed-his": "royalblue"
+        }
+    },
+    "13_nucleolus_nucleus_profile": {
+        "folder_path": "data/13_nucleolus_nucleus_profile",
+        "experiments": [
+            "Fed_with_spotmax_3Dseg", "Starved_with_spotmax_3D_seg"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "Starved_with_spotmax_3D_seg;;Fed_with_spotmax_3Dseg"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Starved_with_spotmax_3D_seg": "orangered",
+            "Fed_with_spotmax_3Dseg": "royalblue"
+        }
+    },
+    "14_WT_raga1_with_degraded_Pol_I": {
+        "folder_path": "data/14_WT_raga1_with_degraded_Pol_I",
+        "experiments": [
+            "WT_degraded_Pol_I", "raga1_degraded_Pol_I"
+        ],
+        "channel": [
+            "SDC405", "SDC405"
+        ],
+        "plots": [
+            "raga1_degraded_Pol_I;;WT_degraded_Pol_I"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "raga1_degraded_Pol_I": "deeppink",
+            "WT_degraded_Pol_I": "royalblue"
+        }
+    },
+    "15_muscles_fed_vs_starved_histone": {
+        "folder_path": "data/15_muscles_fed_vs_starved_histone",
+        "experiments": [
+            "fed_muscles", "str_muscles"
+        ],
+        "channel": [
+            "w1SDC488", "w1SDC488"
+        ],
+        "plots": [
+            "str_muscles;;fed_muscles"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "str_muscles": "orangered",
+            "fed_muscles": "royalblue"
         }
     }
 }

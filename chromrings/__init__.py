@@ -36,8 +36,13 @@ figures_path = os.path.join(pwd_path, 'figures')
 NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo'
+USE_ABSOLUTE_DIST = False
 
+# '15_muscles_fed_vs_starved_histone'
+# '13_nucleolus_nucleus_profile', '14_WT_raga1_with_degraded_Pol_I'
+# '10_Tir_1', '11_hypoderm', '12_adults'
+# '9_raga1', '8_raga1_all_categories'
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
-# '3_raga1_Daf15' '2_Pol_I_II', '1_test_3D_vs_2D' 
-batch_name = '5_WT_starved_DNA_vs_histone' 
+# '3_Daf15' '2_Pol_I_II', '1_test_3D_vs_2D' 
+batch_name = '14_WT_raga1_with_degraded_Pol_I' 

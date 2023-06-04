@@ -16,10 +16,10 @@ from acdctools.plot import heatmap
 from chromrings import tables_path, figures_path
 from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    data_info_json_path
+    data_info_json_path, USE_ABSOLUTE_DIST
 )
 
-SAVE = True
+SAVE = False
 NORMALISE_BY_MAX = False
 PLOTS = ['Pol I-', 'Pol II-', 'Pol III-']
 CI_METHOD = '95perc_standard_error' # 'min_max'
@@ -30,6 +30,7 @@ filename_prefix = (
     f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
     f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
     f'_norm_how_{NORMALISE_HOW}'
+    f'_absolut_dist_{USE_ABSOLUTE_DIST}'
 )
 
 profiles_filename = f'{filename_prefix}_profiles.parquet'
