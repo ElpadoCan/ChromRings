@@ -16,18 +16,26 @@ from acdctools.plot import heatmap
 
 from chromrings import tables_path, figures_path
 from chromrings import (
-    data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST
+    data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST, 
+    NORMALISE_AVERAGE_PROFILE, NORMALIZE_EVERY_PROFILE, 
+    USE_MANUAL_NUCLEOID_CENTERS
 )
 from chromrings.core import keep_last_point_less_nans
 
-SAVE = False
+SAVE = True
 NORMALISE_BY_MAX = False
 CI_METHOD = '95perc_standard_error' # 'min_max'
 STAT_TO_PLOT = 'mean' # 'CV', 'skew', 'mean'
 PHYSICAL_SIZE_X = 0.1346344
 
 df_profiles, profiles_filename = utils.read_df_profiles(stat_to_plot=STAT_TO_PLOT)
-print(f'Using table file "{profiles_filename}"')
+print('*'*60)
+answer = input(
+    f'Plotting from table: {profiles_filename}\n'
+    'Continue ([Y]/N)? '
+)
+if answer.lower() == 'n':
+    exit('Execution stopped')
 
 if (df_profiles['dist_perc'] < 0).any():
     x_labels = np.arange(df_profiles['dist_perc'].min(),101,20)
@@ -41,6 +49,9 @@ else:
     x_label = 'Distance from nucleus center of mass'
 
 if USE_ABSOLUTE_DIST:
+    df_profiles = df_profiles.set_index('dist_perc')
+    abs_max = df_profiles.max(axis=None)
+    df_profiles = (df_profiles/abs_max).reset_index()
     df_profiles['dist'] = df_profiles['dist_perc'] * PHYSICAL_SIZE_X
     min_dist = df_profiles['dist'].min()
     max_dist = df_profiles['dist'].max()
@@ -63,6 +74,11 @@ else:
     x_label = f'{x_label} [%]'
     x_dist_labels = x_labels
     df_profiles['dist'] = df_profiles['dist_perc'] 
+
+if NORMALISE_AVERAGE_PROFILE or NORMALIZE_EVERY_PROFILE:
+    y_axis_label = f'Normalised {STAT_TO_PLOT}'
+else:
+    y_axis_label = f'{STAT_TO_PLOT} [a.u.]'
 
 with open(data_info_json_path, 'r') as json_file:
     data_info = json.load(json_file)
@@ -204,11 +220,15 @@ for group_name in figs:
         axis.set_xticks(x_dist_labels)
         axis.set_ylim((0,1.05))
         axis.set_xlabel(x_label)
-        axis.set_ylabel(f'Normalised {STAT_TO_PLOT}')
+        axis.set_ylabel(y_axis_label)
         if add_vline_zero:
             axis.axvline(0, color='r', ls='--')
     
     if SAVE:
-        fig.savefig(os.path.join(figures_path, f'{batch_name}_{group_name}.pdf'))
+        pdf_filename = f'{batch_name}_{group_name}'
+        if USE_MANUAL_NUCLEOID_CENTERS:
+            pdf_filename = f'{pdf_filename}_with_manual_centroids'
+        pdf_filepath = os.path.join(figures_path, f'{pdf_filename}.pdf')
+        fig.savefig(pdf_filepath)
 
 plt.show()

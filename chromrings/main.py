@@ -16,7 +16,7 @@ from tqdm import tqdm
 from chromrings import (
     data_path, core, utils, tables_path, data_info_json_path,
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    batch_name, USE_ABSOLUTE_DIST
+    batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS
 )
 
 SAVE = True
@@ -92,6 +92,7 @@ for e, exp_folder in enumerate(exp_foldernames):
         segm_filename = None
         image_filename = None
         nucleolus_segm_filename = None
+        nucleolus_centers_csv_filename = None
         for file in utils.listdir(images_path):
             if file.endswith(f'{channel}.tif'):
                 image_filename = file
@@ -101,6 +102,8 @@ for e, exp_folder in enumerate(exp_foldernames):
                 segm_filename = file
             elif file.endswith('segm.npz'):
                 segm_filename = file
+            elif file.endswith('nu.csv'):
+                nucleolus_centers_csv_filename = file
 
         if image_filename is None:
             main_pbar.close()
@@ -121,6 +124,16 @@ for e, exp_folder in enumerate(exp_foldernames):
                 images_path, nucleolus_segm_filename
             )
             nucleolus_segm_data = np.load(nucleolus_segm_filepath)['frame_0']
+        
+        nucleolus_centers_df = None
+        if nucleolus_centers_csv_filename is not None and USE_MANUAL_NUCLEOID_CENTERS:
+            nucleolus_centers_csv_filepath = os.path.join(
+                images_path, nucleolus_centers_csv_filename
+            )
+            nucleolus_centers_df = (
+                pd.read_csv(nucleolus_centers_csv_filepath)
+                .set_index('Cell_ID')
+            )
 
         segm_filepath = os.path.join(images_path, segm_filename)
         image_filepath = os.path.join(images_path, image_filename)
@@ -138,10 +151,11 @@ for e, exp_folder in enumerate(exp_foldernames):
             normalize_every_profile=NORMALIZE_EVERY_PROFILE,
             normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
             normalise_how=NORMALISE_HOW,
-            inpsect_single_profiles=INSPECT_SINGLE_PROFILES,
-            inpsect_mean_profile=INSPECT_MEAN_PROFILE,
+            inspect_single_profiles=INSPECT_SINGLE_PROFILES,
+            inspect_mean_profile=INSPECT_MEAN_PROFILE,
             inner_lab=nucleolus_segm_data,
-            use_absolute_dist=USE_ABSOLUTE_DIST
+            use_absolute_dist=USE_ABSOLUTE_DIST,
+            centers_df=nucleolus_centers_df
         )
 
         IDs = []
@@ -229,6 +243,7 @@ filename_prefix = (
     f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
     f'_norm_how_{NORMALISE_HOW}'
     f'_absolut_dist_{USE_ABSOLUTE_DIST}'
+    f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
 )
 
 filename_prefix_skew = filename_prefix.replace(

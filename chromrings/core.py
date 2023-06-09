@@ -43,8 +43,8 @@ def radial_profiles(
         invert_intensities=True, resample_bin_size_dist=5,
         tqdm_kwargs=None, normalize_every_profile=True,
         normalise_how='max', normalise_average_profile=False, 
-        inpsect_single_profiles=False, inpsect_mean_profile=False,
-        inner_lab=None, use_absolute_dist=False
+        inspect_single_profiles=False, inspect_mean_profile=False,
+        inner_lab=None, use_absolute_dist=False, centers_df=None
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -74,9 +74,9 @@ def radial_profiles(
     normalise_how : str, optional
         Which function to use for normalisation of final average profile, 
         either 'max' or 'sum', by default 'max'
-    inpsect_single_profiles : bool, optional
+    inspect_single_profiles : bool, optional
         Visualise partial results, by default False
-    inpsect_mean_profile : bool, optional
+    inspect_mean_profile : bool, optional
         Visualise mean profile, by default False
     inner_lab : np.ndarray, optional
         Optional inner segmentation labels, by default None. 
@@ -84,6 +84,11 @@ def radial_profiles(
         i.e., the outer edge of the object.
     use_absolute_dist : bool, optional
         Do not use percentage distances, by default False
+    centers_df : pd.DataFrame, optional
+        Pandas DataFrame with `z, y, x` columns and `Cell_ID` as index, 
+        by default None.
+        If not None, the z, y, x coordinates are used as the center of the 
+        object for the radial profiles.
 
     Returns
     -------
@@ -109,9 +114,18 @@ def radial_profiles(
         inner_lab_masked = np.zeros_like(lab)
 
     for obj in tqdm(rp, desc='Computing radiant profiles', **tqdm_kwargs):
-        if inner_lab is None:
+        if centers_df is not None and obj.label in centers_df.index:
+            # Center coordinates are provided as input
+            center_df = centers_df.loc[obj.label]
+            zc = center_df['z']
+            yc = center_df['y']
+            xc = center_df['x']
+            weighted_centroid = (zc, yc, xc)
+        elif inner_lab is None:
+            # Use weighted centroid
             weighted_centroid = obj.weighted_centroid
         else:
+            # Use centroid of the inner object provided as input
             inner_masked = inner_lab[obj.slice][obj.image]
             inner_masked = inner_masked[inner_masked>0]
             inner_ids, inner_count = np.unique(
@@ -237,7 +251,7 @@ def radial_profiles(
 
             all_dist.update(dist_perc)
 
-            if inpsect_single_profiles:
+            if inspect_single_profiles:
                 fig, ax = plt.subplots(1,2, figsize=(16,8))
                 ax[0].imshow(img_data_2D)
                 ax[0].set_xlim((xmin-sp, xmax+sp))
@@ -267,6 +281,7 @@ def radial_profiles(
             obj.radial_df['is_saturated'] = is_saturated
         
         obj.radial_df.sort_index(inplace=True)
+        obj.radial_df = obj.radial_df.astype(float)
 
         obj.mean_radial_profile = obj.radial_df[cols].mean(axis=1)
         obj.stds_radial_profile = obj.radial_df[cols].std(axis=1)
@@ -283,21 +298,29 @@ def radial_profiles(
         if normalise_average_profile:
             if normalise_how == 'tot_fluo':
                 norm_value = img_data[obj.slice][obj.image].sum()
+            elif normalise_how is None or normalise_how == 'None':
+                try:
+                    norm_value = np.iinfo(img_data.dtype).max
+                except ValueError:
+                    norm_value = 1
             else:
                 norm_func = getattr(np, normalise_how)
                 norm_value = norm_func(obj.mean_radial_profile)     
             obj.mean_radial_profile /= norm_value
-
+            
         profile_series = (
             obj.stds_radial_profile, obj.CVs_radial_profile, 
             obj.skews_radial_profile
         )
         for series_profile in (profile_series):
-            norm_func = getattr(np, normalise_how)
+            try:
+                norm_func = getattr(np, normalise_how)
+            except TypeError as e:
+                break
             norm_value = norm_func(series_profile)
             series_profile /= norm_value
         
-        if inpsect_mean_profile:
+        if inspect_mean_profile:
             print('')
             print(obj.mean_radial_profile)
             fig, ax = plt.subplots(1,2)

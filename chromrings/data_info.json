@@ -19,7 +19,7 @@
             "3D_seg/fed": "royalblue"
         }
     },
-    "2_Pol_I_II": {
+    "2_Pol_I_II_III": {
         "folder_path": "data/2_Pol_I_II_III",
         "experiments": [
             "Pol I-auxin 3hrs", "Pol I-EtOH (control)", 
