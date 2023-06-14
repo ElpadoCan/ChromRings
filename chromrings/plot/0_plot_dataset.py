@@ -153,7 +153,8 @@ for group_name in figs:
         #     if name == ('Position_9', 'ID_12_mean_radial_profile'):
         #         import pdb; pdb.set_trace()
         
-        heatmap(
+        
+        _, _, im = heatmap(
             data,
             x='dist_perc', 
             z='normalised_intensity',
@@ -163,9 +164,12 @@ for group_name in figs:
             x_labels=x_labels,
             z_min=0,
             z_max=1.0,
-            add_x_0_label=add_x_0_label
+            add_x_0_label=add_x_0_label, 
+            imshow_kwargs={'aspect': 'auto'}
         )
-        
+        # print(exp_folder, len(data.groupby(['Position_n', 'ID'])))
+        # print(im.get_array().shape)
+        # import pdb; pdb.set_trace()
         axis.set_xlabel(x_label)
         axis.set_title(exp_folder)
         axis.set_yticks([])
@@ -174,11 +178,12 @@ for group_name in figs:
         #     axis.axvline(0, color='r', ls='--')
 
         """Line plot"""
-        agg_col = col // len(plot_experiments)
+        agg_col = col // 2 # len(plot_experiments)
         for key, color in colors.items():
             if exp_folder.find(key) != -1:
                 break
-
+        
+        # import pdb; pdb.set_trace()
         axis = ax[1, agg_col]
         
         data = df_profiles.set_index('dist')[exp_folder]

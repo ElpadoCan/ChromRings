@@ -15,32 +15,27 @@ from acdctools.plot import heatmap
 
 from chromrings import tables_path, figures_path
 from chromrings import (
-    NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    data_info_json_path, USE_ABSOLUTE_DIST
+    utils, data_info_json_path, USE_MANUAL_NUCLEOID_CENTERS
 )
 
-SAVE = False
+SAVE = True
 NORMALISE_BY_MAX = False
 PLOTS = ['Pol I-', 'Pol II-', 'Pol III-']
 CI_METHOD = '95perc_standard_error' # 'min_max'
-batch_name = '2_Pol_I_II'
+batch_name = '2_Pol_I_II_III'
 
-filename_prefix = (
-    f'{batch_name}'
-    f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
-    f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
-    f'_norm_how_{NORMALISE_HOW}'
-    f'_absolut_dist_{USE_ABSOLUTE_DIST}'
+STAT_TO_PLOT = 'mean' # 'CV', 'skew', 'mean'
+
+df_profiles, profiles_filename = utils.read_df_profiles(
+    stat_to_plot=STAT_TO_PLOT, batch_name=batch_name
 )
-
-profiles_filename = f'{filename_prefix}_profiles.parquet'
-profiles_summary_filename = f'{filename_prefix}_profiles_summary.parquet'
-
-df_summary_path = os.path.join(tables_path, profiles_summary_filename)
-df_profiles = os.path.join(tables_path, profiles_filename)
-
-df_summary = pd.read_parquet(df_summary_path)
-df_profiles = pd.read_parquet(df_profiles).reset_index()
+print('*'*60)
+answer = input(
+    f'Plotting from table: {profiles_filename}\n'
+    'Continue ([Y]/N)? '
+)
+if answer.lower() == 'n':
+    exit('Execution stopped')
 
 with open(data_info_json_path, 'r') as json_file:
     data_info = json.load(json_file)
@@ -148,6 +143,9 @@ for PLOT in PLOTS:
         axis.set_ylabel('Normalised mean intensity')
     
     if SAVE:
-        fig.savefig(os.path.join(figures_path, f'{batch_name}_{PLOT}.pdf'))
+        pdf_filename = f'{batch_name}_{PLOT}'
+        if USE_MANUAL_NUCLEOID_CENTERS:
+            pdf_filename = f'{pdf_filename}_with_manual_centroids'
+        fig.savefig(os.path.join(figures_path, f'{pdf_filename}.pdf'))
 
 plt.show()

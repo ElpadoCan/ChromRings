@@ -46,4 +46,4 @@ USE_MANUAL_NUCLEOID_CENTERS = True
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
-batch_name = '11_hypoderm' 
+batch_name = '2_Pol_I_II_III' 
