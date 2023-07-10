@@ -20,7 +20,7 @@ from chromrings import (
 )
 from chromrings.core import keep_last_point_less_nans
 
-SAVE = False
+SAVE = True
 NORMALISE_BY_MAX = False
 CI_METHOD = '95perc_standard_error' # 'min_max'
 FED_DATASET = '7_WT_starved_vs_fed_histone' # '1_test_3D_vs_2D'

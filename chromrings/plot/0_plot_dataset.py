@@ -120,7 +120,7 @@ for group_name in figs:
     nrows = 2
     fig, ax = plt.subplots(nrows, ncols, figsize=(ncols*6,9))
     fig.subplots_adjust(
-        left=0.06, bottom=0.06, right=0.95, top=0.95
+        left=0.06, bottom=0.06, right=0.94, top=0.95
     )
     plots_group = [plot for plot in plots if plot.startswith(group_name)]
     plots_pairs = plots_group.copy()
@@ -178,7 +178,10 @@ for group_name in figs:
         #     axis.axvline(0, color='r', ls='--')
 
         """Line plot"""
-        agg_col = col // 2 # len(plot_experiments)
+        if plots_group[0] == 'all':
+            agg_col = 0
+        else:
+            agg_col = plots_group.index(exp_folder) // 2 # len(plot_experiments)
         for key, color in colors.items():
             if exp_folder.find(key) != -1:
                 break

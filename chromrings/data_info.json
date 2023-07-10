@@ -64,18 +64,22 @@
     "4_WT_refed": {
         "folder_path": "data/4_WT_refed",
         "experiments": [
-            "WT-5min refed", "WT-30min refed"
+            "WT-5min refed", "WT-30min refed", 
+            "WT starved-his_control_refeeding",
+            "WT fed-his_control_refeeding"
         ],
         "channel": [
-            "w1SDC488", "w1SDC488"
+            "w1SDC488", "w1SDC488", "w1SDC488", "w1SDC488"
         ],
         "plots": [
-            "WT-5min refed;;WT-30min refed"
+            "all"
         ], 
         "figs": [""], 
         "colors": {
-            "5min refed": "darkturquoise",
-            "30min refed": "royalblue"
+            "5min refed": "deeppink",
+            "30min refed": "darkturquoise",
+            "WT fed-his_control_refeeding": "royalblue",
+            "WT starved-his_control_refeeding": "orangered"
         }
     },
     "5_WT_starved_DNA_vs_histone": {
@@ -113,21 +117,7 @@
         }
     },
     "7_WT_starved_vs_fed_histone": {
-        "folder_path": "data/7_WT_starved_vs_fed_histone",
-        "experiments": [
-            "WT fed-his", "WT starved-his"
-        ],
-        "channel": [
-            "w1SDC488", "w1SDC488"
-        ],
-        "plots": [
-            "WT fed-his;;WT starved-his"
-        ], 
-        "figs": [""], 
-        "colors": {
-            "WT fed-his": "royalblue",
-            "WT starved-his": "orangered"
-        }
+        "notes": "This does not exist anymore. Merged with dataset 4 since they are the controls for refeeding"
     },
     "8_raga1_all_categories": {
         "folder_path": "data/8_raga1_all_categories",
@@ -265,6 +255,99 @@
         "colors": {
             "str_muscles": "orangered",
             "fed_muscles": "royalblue"
+        }
+    },
+    "16_cold_shock": {
+        "folder_path": "data/16_cold_shock",
+        "experiments": ["Cold_shock"],
+        "channel": ["SDC488"],
+        "plots": [
+            "Cold_shock"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Cold_shock": "orangered"
+        }
+    },
+    "17_heat_shock": {
+        "folder_path": "data/17_heat_shock",
+        "experiments": ["Heat_shock"],
+        "channel": ["SDC488"],
+        "plots": [
+            "Heat_shock"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Heat_shock": "orangered"
+        }
+    },
+    "18_Actinomycin": {
+        "folder_path": "data/18_Actinomycin",
+        "experiments": [
+            "ActD", "DMSO"
+        ],
+        "channel": [
+            "SDC405", "SDC405"
+        ],
+        "plots": [
+            "ActD;;DMSO"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "ActD": "orangered",
+            "DMSO": "royalblue"
+        }
+    },
+    "19_AMPK": {
+        "folder_path": "data/19_AMPK",
+        "experiments": [
+            "AMPK starved", "WT starved-his_AMPK_control"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "AMPK starved;;WT starved-his_AMPK_control"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "WT starved-his_AMPK_control": "orangered",
+            "AMPK starved": "deeppink"
+        }
+    },
+    "20_WT_two_osmolarities": {
+        "folder_path": "data/20_WT_two_osmolarities",
+        "experiments": [
+            "Osmolarity 120", "Osmolarity 540"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "Osmolarity 120;;",
+            "Osmolarity 540;;"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Osmolarity 120": "royalblue",
+            "Osmolarity 540": "royalblue"
+        }
+    },
+    "21_fast_on_plate_fed_in_liquid": {
+        "folder_path": "data/21_fast_on_plate_fed_in_liquid",
+        "experiments": [
+            "Fasting on a plate", "Feeding in liquid"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "Fasting on a plate;;Feeding in liquid"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Fasting on a plate": "orangered",
+            "Feeding in liquid": "royalblue"
         }
     }
 }

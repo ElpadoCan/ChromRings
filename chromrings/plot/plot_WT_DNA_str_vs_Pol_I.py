@@ -16,16 +16,17 @@ from acdctools.plot import heatmap
 from chromrings import tables_path, figures_path
 from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    data_info_json_path, batch_name
+    utils
 )
 from chromrings.core import keep_last_point_less_nans
 
 SAVE = True
 NORMALISE_BY_MAX = False
 CI_METHOD = '95perc_standard_error' # 'min_max'
+STAT_TO_PLOT = 'mean' # 'CV', 'skew', 'mean'
 STR_DATASET = '5_WT_starved_DNA_vs_histone' # '1_test_3D_vs_2D'
 STR_EXP_FOLDER = 'WT starved-DNA' # '2D_seg/str'
-POL_I_DATASET = '2_Pol_I_II'
+POL_I_DATASET = '2_Pol_I_II_III'
 POL_I_EXP_FOLDER = 'Pol I-auxin 3hrs' # '2D_seg/fed'
 
 PDF_FILENAME = '5_2_WT_starved_DNA_vs_Pol_I_degraded_fed.pdf'
@@ -37,22 +38,21 @@ filename_prefix_str = (
     f'_norm_how_{NORMALISE_HOW}'
 )
 
-profiles_filename = f'{filename_prefix_str}_profiles.parquet'
-
-df_profiles_path_str = os.path.join(tables_path, profiles_filename)
-df_profiles_str = pd.read_parquet(df_profiles_path_str).reset_index()
-
-filename_prefix_fed = (
-    f'{POL_I_DATASET}'
-    f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
-    f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
-    f'_norm_how_{NORMALISE_HOW}'
+df_profiles_str, _ = utils.read_df_profiles(
+    stat_to_plot=STAT_TO_PLOT, batch_name=STR_DATASET
 )
 
-profiles_filename = f'{filename_prefix_fed}_profiles.parquet'
 
-df_profiles_path_pol_i = os.path.join(tables_path, profiles_filename)
-df_profiles_pol_i = pd.read_parquet(df_profiles_path_pol_i).reset_index()
+# filename_prefix_fed = (
+#     f'{POL_I_DATASET}'
+#     f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
+#     f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
+#     f'_norm_how_{NORMALISE_HOW}'
+# )
+
+df_profiles_pol_i, _ = utils.read_df_profiles(
+    stat_to_plot=STAT_TO_PLOT, batch_name=POL_I_DATASET
+)
 
 fed_plot = {
     'exp_folder': STR_EXP_FOLDER,
