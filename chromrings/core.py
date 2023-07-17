@@ -1,11 +1,14 @@
 import os
 
+from typing import Literal
+
 import numpy as np
 import cv2
 from math import sqrt, pow
 import skimage.measure
 from scipy.optimize import least_squares
 from scipy.special import erf
+import math
 
 import pandas as pd
 
@@ -39,12 +42,20 @@ def get_objContours(obj, obj_image=None, all=False):
 
 def radial_profiles(
         lab: np.ndarray, img_data: np.ndarray, 
-        extra_radius=0, how='object', 
-        invert_intensities=True, resample_bin_size_dist=5,
-        tqdm_kwargs=None, normalize_every_profile=True,
-        normalise_how='max', normalise_average_profile=False, 
-        inspect_single_profiles=False, inspect_mean_profile=False,
-        inner_lab=None, use_absolute_dist=False, centers_df=None
+        extra_radius=0, 
+        how='object', 
+        plane=Literal['xy', 'yz', 'xz'],
+        invert_intensities=True, 
+        resample_bin_size_dist=5,
+        tqdm_kwargs=None, 
+        normalize_every_profile=True,
+        normalise_how='max', 
+        normalise_average_profile=False, 
+        inspect_single_profiles=False,
+        inspect_mean_profile=False,
+        inner_lab=None, 
+        use_absolute_dist=False, 
+        centers_df=None
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -61,6 +72,8 @@ def radial_profiles(
     how : str, optional
         Controls whether the contour should be the object's contour 
         (`how = 'object'`) or a  circle (`how = 'circle'`), by default 'object'
+    how : str, optional
+        Plane to use. Options are 'xy', 'yz', or 'xz'
     invert_intensities : bool, optional
         Invert black/white levels in `img_data`, by default True
     resample_bin_size_dist : int, optional
@@ -98,6 +111,17 @@ def radial_profiles(
         `radial_profile_argmax`, and `radial_profile_distr_std`.
     """    
     max_dtype = np.iinfo(img_data.dtype).max
+    
+    if plane == 'yz':
+        lab = np.rot90(lab, axes=(0,2))
+        img_data = np.rot90(img_data, axes=(0,2))
+        if inner_lab is not None:
+            inner_lab = np.rot90(inner_lab, axes=(0,2))
+    elif plane == 'xz':
+        lab = np.rot90(lab)
+        img_data = np.rot90(img_data)
+        if inner_lab is not None:
+            inner_lab = np.rot90(inner_lab)
 
     if tqdm_kwargs is None:
         tqdm_kwargs = {}
@@ -208,19 +232,22 @@ def radial_profiles(
                 inner_yy, inner_xx = np.where(inner_contours_lab == inner_val)
                 inner_y, inner_x = inner_yy[0], inner_xx[0]
                 
-            # Normalize distance to object edge
-            if inner_lab is not None:
-                y0, x0 = inner_y, inner_x
-            else:
-                y0, x0 = y1, x1
+            # # Normalize distance to object edge
+            # if inner_lab is not None:
+            #     y0, x0 = inner_y, inner_x
+            # else:
+            y0, x0 = y1, x1
             xy_arr = np.column_stack((xx_line, yy_line))
             diff = np.subtract(xy_arr, (x0, y0))
             dist = np.linalg.norm(diff, axis=1)
             zero_dist_idx = dist.argmin()
             if not use_absolute_dist:
-                full_dist = sqrt(pow(y2-y0, 2) + pow(x2-x0, 2))
+                full_dist = math.dist([y2, x2], [y0, x0]) 
                 dist_100 = full_dist - extra_radius
-                dist = dist/dist_100
+                try:
+                    dist = dist/dist_100
+                except Exception as e:
+                    import pdb; pdb.set_trace()
                 dist_perc = np.round(dist*100).astype(int)
             else:
                 dist_perc = np.round(dist).astype(int)

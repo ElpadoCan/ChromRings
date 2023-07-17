@@ -6,8 +6,8 @@ from chromrings import data_path
 
 dataset_name = '13_nucleolus_nucleus_profile'
 
-nucleolus_fed = 'AllPos_acdc_output_nucleolus_fed.csv'
-nucleolus_str = 'AllPos_acdc_output_nucleolus_starved.csv'
+nucleolus_fed = 'AllPos_acdc_output_nucleolus_tracked_fed.csv'
+nucleolus_str = 'AllPos_acdc_output_nucleolus_tracked_starved.csv'
 nucleus_fed = 'AllPos_acdc_output_nucleus_fed.csv'
 nucleus_str = 'AllPos_acdc_output_nucleus_starved.csv'
 

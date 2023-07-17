@@ -16,8 +16,11 @@ from tqdm import tqdm
 from chromrings import (
     data_path, core, utils, tables_path, data_info_json_path,
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS
+    batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
+    PLANE
 )
+
+np.seterr(all='raise')
 
 SAVE = True
 INSPECT_SINGLE_PROFILES = False
@@ -43,6 +46,7 @@ answer = input(
     f'  * Name: {batch_name}\n'
     f'  * Folders: {exp_foldernames}\n'
     f'  * Channel: {channel_name}\n'
+    f'  * Plane: {PLANE}\n'
     '\n'
     'Continue ([Y]/N)? '
 )
@@ -98,8 +102,8 @@ for e, exp_folder in enumerate(exp_foldernames):
                 image_filename = file
             elif file.endswith('segm_nucleolus.npz'):
                 nucleolus_segm_filename = file
-            elif file.find('_segm_') != -1 and file.endswith('.npz'):
-                segm_filename = file
+            # elif file.find('_segm_') != -1 and file.endswith('.npz'):
+            #     segm_filename = file
             elif file.endswith('segm.npz'):
                 segm_filename = file
             elif file.endswith('nu.csv'):
@@ -144,6 +148,7 @@ for e, exp_folder in enumerate(exp_foldernames):
         rp = core.radial_profiles(
             segm_data, img_data, 
             how='object', 
+            plane=PLANE,
             invert_intensities=True, 
             resample_bin_size_dist=resample_bin_size_dist,
             extra_radius=0,
@@ -244,6 +249,7 @@ filename_prefix = (
     f'_norm_how_{NORMALISE_HOW}'
     f'_absolut_dist_{USE_ABSOLUTE_DIST}'
     f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
+    f'_{PLANE}plane'
 )
 
 filename_prefix_skew = filename_prefix.replace(
