@@ -37,8 +37,8 @@ NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo' # None
 USE_ABSOLUTE_DIST = False
-USE_MANUAL_NUCLEOID_CENTERS = False
-PLANE = 'yz' # 'xy', 'yz', or 'xz'
+USE_MANUAL_NUCLEOID_CENTERS = True
+PLANE = 'xy' # 'xy', 'yz', or 'xz'
 
 # '20_WT_two_osmolarities' '21_fast_on_plate_fed_in_liquid'
 # '16_cold_shock', '17_heat_shock', '18_Actinomycin', '19_AMPK'
