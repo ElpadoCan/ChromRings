@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from typing import Literal
 
@@ -6,8 +7,9 @@ import numpy as np
 import cv2
 from math import sqrt, pow
 import skimage.measure
-from scipy.optimize import least_squares
+from scipy.optimize import least_squares, curve_fit
 from scipy.special import erf
+from scipy.signal import find_peaks
 import math
 
 import pandas as pd
@@ -397,10 +399,34 @@ class PeaksModel:
         init_guess = []
         sx = np.std(X)/len(xx_peaks)
         for x_peak, y_peak in zip(xx_peaks, yy_peaks):
-            A_peak = y_peak * sx * np.sqrt(2*np.pi)
-            init_guess.extend((x_peak, sx, A_peak))
+            # A_peak = y_peak * sx * np.sqrt(2*np.pi)
+            init_guess.extend((x_peak, sx, 1))
         return init_guess
 
+    def bounds(self, yy, xx, init_guess):
+        lower_bounds = np.array([-np.inf]*(self.n_peaks*3 + 1))
+        upper_bounds = np.array([np.inf]*(self.n_peaks*3 + 1))
+        
+        # Background and amplitude no lower than 0
+        lower_bounds[-1] = 0
+        lower_bounds[2::3] = 0
+        
+        # Force peak center at init guess +-5
+        lower_bounds[:6:3] = np.array(init_guess)[::3] - 5
+        upper_bounds[:6:3] = np.array(init_guess)[::3] + 5
+        
+        # Standard deviation no greater than xx range
+        xx_range = np.max(xx) - np.min(xx)
+        lower_bounds[1::3] = -xx_range
+        upper_bounds[1::3] = xx_range
+        
+        # Background and amplitude no higher than max yy
+        yy_max = np.max(yy)
+        upper_bounds[-1] = yy_max
+        upper_bounds[2::3] = yy_max
+        
+        return (lower_bounds, upper_bounds)
+    
     def model(self, X, coeffs, B):
         _model = np.zeros(len(X))
         n = 0
@@ -410,13 +436,45 @@ class PeaksModel:
             n += 3
         return _model + B
 
-    def fit(self, X, Y, init_guess_coeffs, B_guess):
+    def curve_fit_func(self, xdata, *coeffs):
+        B = coeffs[-1]
+        return self.model(xdata, coeffs, B)
+    
+    def least_squares(self, X, Y, init_guess_coeffs, B_guess, bounds=None):
         coeffs = init_guess_coeffs.copy()
         coeffs.append(B_guess)
-        result = least_squares(
-            self.residuals, coeffs, args=(Y, X)
-        )
+        kwargs = {}
+        if bounds is not None:
+            kwargs['bounds'] = bounds
+        try:
+            result = least_squares(
+                self.residuals, coeffs, args=(Y, X), **kwargs
+            )
+        except Exception as err:
+            print('')
+            traceback.print_exc()
+            import pdb; pdb.set_trace()
+            return 
         return result
+
+    def fit(self, X, Y, init_guess_coeffs, B_guess, bounds=None):
+        kwargs = {}
+        if bounds is not None:
+            kwargs['bounds'] = bounds
+        coeffs = init_guess_coeffs.copy()
+        coeffs.append(B_guess)
+        coeffs, pcov = curve_fit(
+            self.curve_fit_func, X, Y, coeffs, **kwargs
+        )
+        return coeffs, pcov
+    
+    def RMSE(self, yy, yy_pred):
+        residuals = yy - yy_pred
+        residuals_squared = np.square(residuals)
+        num_samples = len(yy)
+        residuals_squared_sum = np.sum(residuals_squared)
+        RMSE = np.sqrt(residuals_squared_sum/num_samples)
+        return RMSE
     
     def residuals(self, coeffs, Y, X):
         B = coeffs[-1]
@@ -453,6 +511,82 @@ class PeaksModel:
             n += 3
         return Is_foregr.sum(), Is_tot.sum(), Is_foregr, Is_tot
 
+def fit_profiles(df_profiles, n_peaks=2, inspect=False, show_pbar=False):
+    n_profiles = len(df_profiles.columns)
+    if show_pbar:
+        pbar = tqdm(total=n_profiles, desc='Profile', ncols=100, leave=False)
+    df_profiles_fit = df_profiles.copy()
+    
+    # Each peak has 3 coefficents plus a global background coeff --> 4 columns
+    n_coeffs_per_profile = 3
+    
+    # We also save additional coeffs: B_pred and RMSE
+    n_additional_coeffs = 2 
+    coeffs_values = np.zeros(
+        (n_profiles*n_peaks, n_coeffs_per_profile+n_additional_coeffs)
+    )
+    coeffs_idx = []
+    model = PeaksModel(n_peaks=n_peaks)
+    for i, column in enumerate(df_profiles.columns):
+        df_profile = df_profiles[column]
+        xx = df_profile.index.values
+        yy = df_profile.values
+        peaks_idxs, props = find_peaks(yy)
+        for j in range(n_peaks):
+            coeffs_idx.append((*column, f'peak_{j}'))
+        if len(peaks_idxs) != n_peaks:
+            df_profiles_fit[column] = np.nan
+            for j in range(n_peaks):
+                n = (n_coeffs_per_profile+n_additional_coeffs)
+                coeffs_values[(i*n_peaks)+j] = [np.nan]*n
+            continue
+        xx_peaks = xx[peaks_idxs]
+        yy_peaks = yy[peaks_idxs]
+        init_guess = model.get_init_guess(xx_peaks, yy_peaks, xx)
+        B_guess = np.nanmin(yy)
+        bounds = model.bounds(yy, xx, init_guess)
+        coeffs_fit, cov = model.fit(xx, yy, init_guess, B_guess, bounds=bounds)
+        coeffs_pred = coeffs_fit[:-1]
+        B_pred = coeffs_fit[-1] 
+        yy_pred = model.model(xx, coeffs_pred, B_pred)
+        df_profiles_fit[column] = yy_pred
+        RMSE = model.RMSE(yy, yy_pred)
+        
+        start_idx = 0
+        for j in range(n_peaks):
+            stop_idx = (j+1)*n_coeffs_per_profile
+            coeffs_peak = coeffs_fit[start_idx:stop_idx]
+            coeffs_peak = [*coeffs_peak, B_pred, RMSE]
+            start_idx = stop_idx
+            coeffs_values[(i*n_peaks)+j] = coeffs_peak
+        
+        if inspect:
+            import matplotlib.pyplot as plt
+            print(f'Fit coefficients = {coeffs_fit}')
+            plt.plot(xx, yy_pred)
+            plt.scatter(xx, yy)
+            plt.show()
+            import pdb; pdb.set_trace()
+        
+        if show_pbar:
+            pbar.update()
+
+    index = pd.MultiIndex.from_tuples(
+        coeffs_idx, 
+        names=['experiment', 'Position_n', 'ID_profile', 'peak_idx']
+    )
+
+    df_coeffs = pd.DataFrame(
+        index=index,
+        columns=['xc_fit', 'sigma_fit', 'A_fit', 'B_fit', 'RMSE'],
+        data=coeffs_values
+    )
+    if show_pbar:
+        pbar.close()
+        
+    return df_profiles_fit, df_coeffs
+        
+        
 def keep_last_point_less_nans(df_group):
     if 105 in df_group.index and 100 in df_group.index:
         count_nan_105 = df_group.loc[105].isna().sum()

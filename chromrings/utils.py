@@ -99,5 +99,6 @@ def read_df_profiles(batch_name=None, stat_to_plot='mean'):
         df_profiles, profiles_filename = _read_df_profiles_from_prefix(
             filename_prefix, stat_to_plot=stat_to_plot
         )
+        return df_profiles, profiles_filename 
     except Exception as e:
         raise e

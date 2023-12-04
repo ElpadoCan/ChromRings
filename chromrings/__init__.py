@@ -40,6 +40,7 @@ USE_ABSOLUTE_DIST = False
 USE_MANUAL_NUCLEOID_CENTERS = True
 PLANE = 'xy' # 'xy', 'yz', or 'xz'
 
+# '22_Pol_I_12h', '23_Pol_I_24h'
 # '20_WT_two_osmolarities' '21_fast_on_plate_fed_in_liquid'
 # '16_cold_shock', '17_heat_shock', '18_Actinomycin', '19_AMPK'
 # '15_muscles_fed_vs_starved_histone'
@@ -49,7 +50,7 @@ PLANE = 'xy' # 'xy', 'yz', or 'xz'
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
-batch_name = '13_nucleolus_nucleus_profile' 
+batch_name = '22_Pol_I_12h' 
 
 # To run on 15.06.2023: 
 # 2, 4, 5, 8, 10 

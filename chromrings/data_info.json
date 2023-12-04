@@ -349,5 +349,39 @@
             "Fasting on a plate": "orangered",
             "Feeding in liquid": "royalblue"
         }
+    },
+    "22_Pol_I_12h": {
+        "folder_path": "data/22_Pol_I_12h",
+        "experiments": [
+            "DCW301", "DCW306"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "DCW301;;DCW306"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "DCW301": "orangered",
+            "DCW306": "royalblue"
+        }
+    },
+    "23_Pol_I_24h": {
+        "folder_path": "data/23_Pol_I_24h",
+        "experiments": [
+            "DCW301", "DCW306"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "DCW301;;DCW306"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "DCW301": "orangered",
+            "DCW306": "royalblue"
+        }
     }
 }
