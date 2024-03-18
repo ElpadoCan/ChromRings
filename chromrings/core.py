@@ -74,7 +74,7 @@ def radial_profiles(
     how : str, optional
         Controls whether the contour should be the object's contour 
         (`how = 'object'`) or a  circle (`how = 'circle'`), by default 'object'
-    how : str, optional
+    plane : str, optional
         Plane to use. Options are 'xy', 'yz', or 'xz'
     invert_intensities : bool, optional
         Invert black/white levels in `img_data`, by default True
@@ -511,7 +511,10 @@ class PeaksModel:
             n += 3
         return Is_foregr.sum(), Is_tot.sum(), Is_foregr, Is_tot
 
-def fit_profiles(df_profiles, n_peaks=2, inspect=False, show_pbar=False):
+def fit_profiles(
+        df_profiles, n_peaks=2, inspect=False, show_pbar=False, 
+        init_guess_peaks_loc=None
+    ):
     n_profiles = len(df_profiles.columns)
     if show_pbar:
         pbar = tqdm(total=n_profiles, desc='Profile', ncols=100, leave=False)
@@ -531,15 +534,27 @@ def fit_profiles(df_profiles, n_peaks=2, inspect=False, show_pbar=False):
         df_profile = df_profiles[column]
         xx = df_profile.index.values
         yy = df_profile.values
-        peaks_idxs, props = find_peaks(yy)
         for j in range(n_peaks):
             coeffs_idx.append((*column, f'peak_{j}'))
-        if len(peaks_idxs) != n_peaks:
-            df_profiles_fit[column] = np.nan
-            for j in range(n_peaks):
-                n = (n_coeffs_per_profile+n_additional_coeffs)
-                coeffs_values[(i*n_peaks)+j] = [np.nan]*n
-            continue
+        
+        if init_guess_peaks_loc is None:
+            peaks_idxs, props = find_peaks(yy, width=2)
+            if len(peaks_idxs) != n_peaks:
+                df_profiles_fit[column] = np.nan
+                for j in range(n_peaks):
+                    n = (n_coeffs_per_profile+n_additional_coeffs)
+                    coeffs_values[(i*n_peaks)+j] = [np.nan]*n
+                plt.plot(xx, yy)
+                plt.scatter(xx[peaks_idxs], yy[peaks_idxs])
+                plt.show()
+                import pdb; pdb.set_trace()
+                continue
+        else:
+            peaks_idxs = []
+            for x_peak in init_guess_peaks_loc:
+                abs_diff = np.abs(xx - x_peak)
+                nearest_idx = np.where(abs_diff==sorted(abs_diff)[0])[0][0]
+                peaks_idxs.append(nearest_idx)
         xx_peaks = xx[peaks_idxs]
         yy_peaks = yy[peaks_idxs]
         init_guess = model.get_init_guess(xx_peaks, yy_peaks, xx)
@@ -561,7 +576,6 @@ def fit_profiles(df_profiles, n_peaks=2, inspect=False, show_pbar=False):
             coeffs_values[(i*n_peaks)+j] = coeffs_peak
         
         if inspect:
-            import matplotlib.pyplot as plt
             print(f'Fit coefficients = {coeffs_fit}')
             plt.plot(xx, yy_pred)
             plt.scatter(xx, yy)

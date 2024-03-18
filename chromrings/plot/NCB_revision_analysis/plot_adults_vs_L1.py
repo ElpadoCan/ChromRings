@@ -28,13 +28,23 @@ df_A_ratio_peaks = (
     (df_coeffs_peak_1.A_fit/df_coeffs_peak_0.A_fit)
     .dropna()
     .reset_index()
-    .rename(columns={'A_fit': 'Ratio amplitudes second/first peak'})
+    .rename(columns={'A_fit': 'Ratio amplitudes outer/inner peak'})
 )
+
+print(df_A_ratio_peaks.groupby('stage').count())
+
+fig, ax = plt.subplots()
+
 # import pdb; pdb.set_trace()
 sns.boxplot(
     x='stage', 
-    y='Ratio amplitudes second/first peak', 
-    data=df_A_ratio_peaks
+    y='Ratio amplitudes outer/inner peak', 
+    data=df_A_ratio_peaks, 
+    ax=ax
 )
+
+figure_filename = 'Adults_vs_L1_outer_to_inner_peak_ratio.pdf'
+figure_filepath = os.path.join(figures_path, figure_filename)
+fig.savefig(figure_filepath)
 
 plt.show()

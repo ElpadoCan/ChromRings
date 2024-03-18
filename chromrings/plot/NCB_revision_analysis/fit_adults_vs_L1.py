@@ -38,7 +38,8 @@ for category, datasets in DATASET_INFO.items():
         )
 
         df_profiles_fit, df_coeffs = core.fit_profiles(
-            df_profiles, inspect=False, show_pbar=True
+            df_profiles, inspect=False, show_pbar=True, 
+            init_guess_peaks_loc=[30, 90]
         )
         keys.append((profiles_filename, category, dataset))
         dfs_profiles_fit.append(df_profiles_fit)
