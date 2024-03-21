@@ -34,9 +34,9 @@
             "Pol I-auxin 3hrs;;Pol I-EtOH (control)",
             "Pol II-auxin 3hrs;;Pol II-EtOH (control)",
             "Pol III-auxin 3hrs;;Pol III-EtOH (control)",
-            "Pol I-str;;Pol I-refed (control)",
-            "Pol II-str;;Pol II-refed (control)",
-            "Pol III-str;;Pol III-refed (control)"
+            "Pol I-str;;Pol I-refed",
+            "Pol II-str;;Pol II-refed",
+            "Pol III-str;;Pol III-refed"
         ],
         "figs": ["Pol I-", "Pol II-", "Pol III-"], 
         "colors": {
@@ -382,6 +382,40 @@
         "colors": {
             "DCW301": "orangered",
             "DCW306": "royalblue"
+        }
+    },
+    "25_hypoderm": {
+        "folder_path": "data/25_hypoderm",
+        "experiments": [
+            "Hypoderm(new)-Fasted", "Hypoderm(new)-Fed"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "Hypoderm(new)-Fasted;;Hypoderm(new)-Fed"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Hypoderm(new)-Fasted": "orangered",
+            "Hypoderm(new)-Fed": "royalblue"
+        }
+    },
+    "26_muscles": {
+        "folder_path": "data/25_hypoderm",
+        "experiments": [
+            "Muscles-Fasted", "Muscles-Fed"
+        ],
+        "channel": [
+            "SDC488", "SDC488"
+        ],
+        "plots": [
+            "Muscles-Fasted;;Muscles-Fed"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Muscles-Fasted": "orangered",
+            "Muscles-Fed": "royalblue"
         }
     }
 }

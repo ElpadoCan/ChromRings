@@ -74,7 +74,7 @@ def radial_profiles(
     how : str, optional
         Controls whether the contour should be the object's contour 
         (`how = 'object'`) or a  circle (`how = 'circle'`), by default 'object'
-    how : str, optional
+    plane : str, optional
         Plane to use. Options are 'xy', 'yz', or 'xz'
     invert_intensities : bool, optional
         Invert black/white levels in `img_data`, by default True

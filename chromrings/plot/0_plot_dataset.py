@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import os
 import json
 
@@ -9,6 +11,8 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
+
+import scipy.stats
 
 from cellacdc.plot import heatmap
 
@@ -103,6 +107,21 @@ df_long = (
 
 # import pdb; pdb.set_trace()
 
+def statistic(curve_1, curve_2, axis=1):
+    return np.mean(curve_1, axis=axis) - np.mean(curve_2, axis=axis)
+
+def cohen_effect_size(curve_1, curve_2):
+    mean_1 = np.mean(curve_1, axis=1)
+    mean_2 = np.mean(curve_2, axis=1)
+    std_1 = np.std(curve_1, axis=1)
+    std_2 = np.std(curve_2, axis=1)
+    
+    std_pooled = np.sqrt((np.square(std_1)+np.square(std_2))/2)
+    
+    effect_size = (mean_2-mean_1)/std_pooled
+    return effect_size
+    
+
 def clip_dist_perc_above_100(group):
     if len(group) == 21:
         clipped = group[group['dist_perc'] < 105]
@@ -117,11 +136,12 @@ for group_name in figs:
         if exp_folder.startswith(group_name)
     ]
     ncols = len(plot_experiments)
-    nrows = 2
-    fig, ax = plt.subplots(nrows, ncols, figsize=(ncols*6,9))
+    nrows = 3
+    fig, ax = plt.subplots(nrows, ncols, figsize=(ncols*5,9))
     fig.subplots_adjust(
-        left=0.06, bottom=0.06, right=0.94, top=0.95
+        left=0.07, bottom=0.06, right=0.94, top=0.95
     )
+    # fig_pt, ax_pt = plt.subplots(1, 2, figsize=(12, 5))
     plots_group = [plot for plot in plots if plot.startswith(group_name)]
     plots_pairs = plots_group.copy()
     if len(plots_group) > 1:
@@ -134,6 +154,9 @@ for group_name in figs:
         plots_group = plots_group[0].split(';;')
     if ncols == 1:
         ax = ax[:, np.newaxis]
+    
+    data_permut_test = defaultdict(list)
+    xx_permut_test = {}
     for col, exp_folder in enumerate(plot_experiments):
         if not exp_folder.startswith(group_name):
             continue
@@ -231,6 +254,31 @@ for group_name in figs:
         axis.set_ylabel(y_axis_label)
         if add_vline_zero:
             axis.axvline(0, color='r', ls='--')
+        
+        data_permut_test[agg_col].append(data.values)
+        xx_permut_test[agg_col] = xx_plot
+    
+    for agg_col, data_test in data_permut_test.items():
+        permutation_result = scipy.stats.permutation_test(
+            data_test, 
+            statistic=statistic, 
+            vectorized=True, 
+            axis=1, 
+            alternative='two-sided'
+        )
+        pvalues = permutation_result.pvalue
+        effect_sizes = cohen_effect_size(*data_test)
+        ax[2, agg_col].plot(xx_plot, -np.log10(pvalues))
+        ax[2, agg_col].set_xlabel(x_label)
+        ax[2, agg_col].set_ylabel('-$log_{10}(p)$')
+        
+        ax[2, agg_col+1].plot(xx_plot, np.abs(effect_sizes))
+        ax[2, agg_col+1].set_xlabel(x_label)
+        ax[2, agg_col+1].set_ylabel('Effect size (Cohen)')
+        
+        # title = ' vs '.join(plot_experiments)
+        # fig_pt.suptitle(title)
+        
     
     if SAVE:
         pdf_filename = f'{batch_name}_{group_name}'
