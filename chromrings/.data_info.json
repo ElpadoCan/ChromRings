@@ -417,21 +417,5 @@
             "Muscles-Fasted": "orangered",
             "Muscles-Fed": "royalblue"
         }
-    },
-    "Daf-15": {
-        "folder_path": "data/Daf-15",
-        "experiments": [
-            "auxin"
-        ],
-        "channel": [
-            "SDC405"
-        ],
-        "plots": [
-            "auxin"
-        ], 
-        "figs": [""], 
-        "colors": {
-            "auxin": "orangered"
-        }
     }
 }

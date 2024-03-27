@@ -259,6 +259,8 @@ for group_name in figs:
         xx_permut_test[agg_col] = xx_plot
     
     for agg_col, data_test in data_permut_test.items():
+        if len(data_test) == 1:
+            continue
         permutation_result = scipy.stats.permutation_test(
             data_test, 
             statistic=statistic, 

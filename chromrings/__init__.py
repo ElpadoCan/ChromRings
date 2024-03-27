@@ -51,7 +51,7 @@ PLANE = 'xy' # 'xy', 'yz', or 'xz'
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
-batch_name = '25_hypoderm' 
+batch_name = 'Daf-15' 
 
 # To run on 15.06.2023: 
 # 2, 4, 5, 8, 10 
