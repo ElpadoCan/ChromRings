@@ -94,7 +94,7 @@ exp_foldernames = batch_info['experiments']
 colors = batch_info['colors']
 
 df_long = (
-    pd.melt(df_profiles, id_vars=['dist_perc'])
+    pd.melt(df_profiles, id_vars=[('dist_perc', '', '')])
     .rename(columns={
         'variable_0': 'experiment',
         'variable_1': 'Position_n',
@@ -104,8 +104,7 @@ df_long = (
     .set_index(['experiment', 'Position_n', 'ID'])
     .sort_index()
 )
-
-# import pdb; pdb.set_trace()
+df_long.columns = ['dist_perc', 'normalised_intensity']
 
 def statistic(curve_1, curve_2, axis=1):
     return np.mean(curve_1, axis=axis) - np.mean(curve_2, axis=axis)
