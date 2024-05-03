@@ -150,8 +150,8 @@
         "figs": [""], 
         "colors": {
             "raga-1- partial rings": "darkturquoise",
-            "- no ring": "royalblue",
-            "- ring": "deeppink",
+            "raga-1- no ring": "royalblue",
+            "raga-1- ring": "deeppink",
             "WT starved-his_raga_control": "orangered"
         }
     },

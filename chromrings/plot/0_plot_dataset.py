@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import os
 import json
+import difflib
 
 import math
 import numpy as np
@@ -166,7 +167,7 @@ for group_name in figs:
             df_long.loc[exp_folder]
             .reset_index()
             .groupby(['Position_n', 'ID'], as_index=False)
-            .apply(clip_dist_perc_above_100, include_groups=True)
+            .apply(clip_dist_perc_above_100)
             .reset_index()
             .fillna(method='ffill')
         )
@@ -207,9 +208,15 @@ for group_name in figs:
             for c, sub_plots in enumerate(plots):
                 if sub_plots.find(exp_folder) != -1:
                     agg_col = c
-        for key, color in colors.items():
-            if exp_folder.find(key) != -1:
-                break
+        
+        color_keys = list(colors.keys())
+        sorted_keys = sorted(
+            color_keys, 
+            key=lambda x: difflib.SequenceMatcher(a=x, b=exp_folder).ratio(), 
+            reverse=True
+        )
+        color_key = sorted_keys[0]
+        color = colors[color_key]
         
         # import pdb; pdb.set_trace()
         axis = ax[1, agg_col]
