@@ -166,7 +166,7 @@ for group_name in figs:
             df_long.loc[exp_folder]
             .reset_index()
             .groupby(['Position_n', 'ID'], as_index=False)
-            .apply(clip_dist_perc_above_100)
+            .apply(clip_dist_perc_above_100, include_groups=True)
             .reset_index()
             .fillna(method='ffill')
         )
@@ -203,7 +203,10 @@ for group_name in figs:
         if plots_group[0] == 'all':
             agg_col = 0
         else:
-            agg_col = plots_group.index(exp_folder) // 2 # len(plot_experiments)
+            # agg_col = plots_group.index(exp_folder) // 2 # len(plot_experiments)
+            for c, sub_plots in enumerate(plots):
+                if sub_plots.find(exp_folder) != -1:
+                    agg_col = c
         for key, color in colors.items():
             if exp_folder.find(key) != -1:
                 break
@@ -258,7 +261,7 @@ for group_name in figs:
         xx_permut_test[agg_col] = xx_plot
     
     for agg_col, data_test in data_permut_test.items():
-        if len(data_test) == 1:
+        if len(data_test) != 2:
             continue
         permutation_result = scipy.stats.permutation_test(
             data_test, 
