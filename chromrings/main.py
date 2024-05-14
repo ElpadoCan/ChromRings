@@ -17,7 +17,7 @@ from chromrings import (
     data_path, core, utils, tables_path, data_info_json_path,
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
-    PLANE
+    PLANE, LARGEST_NUCLEI_PERCENT
 )
 
 np.seterr(all='raise')
@@ -25,6 +25,13 @@ np.seterr(all='raise')
 SAVE = True
 INSPECT_SINGLE_PROFILES = False
 INSPECT_MEAN_PROFILE = False
+if LARGEST_NUCLEI_PERCENT is not None:
+    answer = input(
+        f'Are you sure you want to continue with {LARGEST_NUCLEI_PERCENT = }\n'
+        'Continue (y/[n])? '
+    )
+    if answer.lower() != 'y':
+        exit('Execution stopped')
 
 if not USE_ABSOLUTE_DIST:
     resample_bin_size_dist = 5
@@ -160,7 +167,8 @@ for e, exp_folder in enumerate(exp_foldernames):
             inspect_mean_profile=INSPECT_MEAN_PROFILE,
             inner_lab=nucleolus_segm_data,
             use_absolute_dist=USE_ABSOLUTE_DIST,
-            centers_df=nucleolus_centers_df
+            centers_df=nucleolus_centers_df, 
+            largest_nuclei_percent=LARGEST_NUCLEI_PERCENT
         )
 
         IDs = []
@@ -172,6 +180,8 @@ for e, exp_folder in enumerate(exp_foldernames):
         obj_series_std = []
         stds = []
         for obj in rp:
+            if not hasattr(obj, 'mean_radial_profile'):
+                continue
             obj_series.append(obj.mean_radial_profile)    
             obj_series_skew.append(obj.skews_radial_profile) 
             obj_series_CV.append(obj.CVs_radial_profile)  
@@ -249,6 +259,7 @@ filename_prefix = (
     f'_norm_how_{NORMALISE_HOW}'
     f'_absolut_dist_{USE_ABSOLUTE_DIST}'
     f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
+    f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
     f'_{PLANE}plane'
 )
 

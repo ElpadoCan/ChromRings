@@ -23,7 +23,7 @@ from chromrings import tables_path, figures_path
 from chromrings import (
     data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST, 
     NORMALISE_AVERAGE_PROFILE, NORMALIZE_EVERY_PROFILE, 
-    USE_MANUAL_NUCLEOID_CENTERS
+    USE_MANUAL_NUCLEOID_CENTERS, LARGEST_NUCLEI_PERCENT
 )
 from chromrings.core import keep_last_point_less_nans
 
@@ -32,6 +32,14 @@ NORMALISE_BY_MAX = False
 CI_METHOD = '95perc_standard_error' # 'min_max'
 STAT_TO_PLOT = 'mean' # 'CV', 'skew', 'mean'
 PHYSICAL_SIZE_X = 0.1346344
+
+if LARGEST_NUCLEI_PERCENT is not None:
+    answer = input(
+        f'Are you sure you want to continue with {LARGEST_NUCLEI_PERCENT = }\n'
+        'Continue (y/[n])? '
+    )
+    if answer.lower() != 'y':
+        exit('Execution stopped')
 
 df_profiles, profiles_filename = utils.read_df_profiles(stat_to_plot=STAT_TO_PLOT)
 print('*'*60)
@@ -57,6 +65,8 @@ if USE_ABSOLUTE_DIST:
     df_profiles = df_profiles.set_index('dist_perc')
     abs_max = df_profiles.max(axis=None)
     df_profiles = (df_profiles/abs_max).reset_index()
+    # NOTE: The 'dist_perc' is in pixels if use_absolute_dist=True in 
+    # core.radial_profiles
     df_profiles['dist'] = df_profiles['dist_perc'] * PHYSICAL_SIZE_X
     min_dist = df_profiles['dist'].min()
     max_dist = df_profiles['dist'].max()
@@ -294,7 +304,11 @@ for group_name in figs:
     if SAVE:
         pdf_filename = f'{batch_name}_{group_name}'
         if USE_MANUAL_NUCLEOID_CENTERS:
-            pdf_filename = f'{pdf_filename}_with_manual_centroids'
+            if not pdf_filename.endswith('_'):
+                pdf_filename = f'{pdf_filename}_'
+            pdf_filename = f'{pdf_filename}with_manual_centroids'
+        if LARGEST_NUCLEI_PERCENT is not None:
+            pdf_filename = f'{pdf_filename}_only_largest_nuclei_{int(LARGEST_NUCLEI_PERCENT*100)}_perc'
         pdf_filepath = os.path.join(figures_path, f'{pdf_filename}.pdf')
         fig.savefig(pdf_filepath)
 

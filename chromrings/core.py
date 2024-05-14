@@ -1,6 +1,8 @@
 import os
 import traceback
 
+from collections import defaultdict
+
 from typing import Literal
 
 import numpy as np
@@ -57,7 +59,8 @@ def radial_profiles(
         inspect_mean_profile=False,
         inner_lab=None, 
         use_absolute_dist=False, 
-        centers_df=None
+        centers_df=None, 
+        largest_nuclei_percent=None
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -104,6 +107,8 @@ def radial_profiles(
         by default None.
         If not None, the z, y, x coordinates are used as the center of the 
         object for the radial profiles.
+    largest_nuclei_percent : float, optional
+        If not None, take only the largest nuclei, i.e., the 0.2 largest.
 
     Returns
     -------
@@ -139,7 +144,15 @@ def radial_profiles(
     if inner_lab is not None:
         inner_lab_masked = np.zeros_like(lab)
 
+    min_area = None
+    if largest_nuclei_percent:
+        areas = [obj.area for obj in rp]
+        min_area = np.quantile(areas, q=1-largest_nuclei_percent)
+    
     for obj in tqdm(rp, desc='Computing radiant profiles', **tqdm_kwargs):
+        if min_area is not None and obj.area < min_area:
+            continue
+        
         if centers_df is not None and obj.label in centers_df.index:
             # Center coordinates are provided as input
             center_df = centers_df.loc[obj.label]
@@ -394,16 +407,16 @@ class PeaksModel:
         f = A*gauss_x
         return f
     
-    def get_init_guess(self, xx_peaks, yy_peaks, X):
+    def get_init_guess(self, xx_peaks, yy_peaks, X, A_init=1.0):
         self.n_peaks = len(xx_peaks)
         init_guess = []
         sx = np.std(X)/len(xx_peaks)
         for x_peak, y_peak in zip(xx_peaks, yy_peaks):
             # A_peak = y_peak * sx * np.sqrt(2*np.pi)
-            init_guess.extend((x_peak, sx, 1))
+            init_guess.extend((x_peak, sx, A_init))
         return init_guess
 
-    def bounds(self, yy, xx, init_guess):
+    def bounds(self, yy, xx, init_guess, peak_center_max_range=5):
         lower_bounds = np.array([-np.inf]*(self.n_peaks*3 + 1))
         upper_bounds = np.array([np.inf]*(self.n_peaks*3 + 1))
         
@@ -412,14 +425,14 @@ class PeaksModel:
         lower_bounds[2::3] = 0
         
         # Force peak center at init guess +-5
-        lower_bounds[:6:3] = np.array(init_guess)[::3] - 5
-        upper_bounds[:6:3] = np.array(init_guess)[::3] + 5
+        lower_bounds[:6:3] = np.array(init_guess)[::3] - peak_center_max_range
+        upper_bounds[:6:3] = np.array(init_guess)[::3] + peak_center_max_range
         
         # Standard deviation no greater than xx range
         xx_range = np.max(xx) - np.min(xx)
         lower_bounds[1::3] = -xx_range
         upper_bounds[1::3] = xx_range
-        
+
         # Background and amplitude no higher than max yy
         yy_max = np.max(yy)
         upper_bounds[-1] = yy_max
@@ -513,7 +526,7 @@ class PeaksModel:
 
 def fit_profiles(
         df_profiles, n_peaks=2, inspect=False, show_pbar=False, 
-        init_guess_peaks_loc=None
+        init_guess_peaks_loc=None, A_init=1.0, peak_center_max_range=5
     ):
     n_profiles = len(df_profiles.columns)
     if show_pbar:
@@ -557,10 +570,24 @@ def fit_profiles(
                 peaks_idxs.append(nearest_idx)
         xx_peaks = xx[peaks_idxs]
         yy_peaks = yy[peaks_idxs]
-        init_guess = model.get_init_guess(xx_peaks, yy_peaks, xx)
+        init_guess = model.get_init_guess(xx_peaks, yy_peaks, xx, A_init=A_init)
         B_guess = np.nanmin(yy)
-        bounds = model.bounds(yy, xx, init_guess)
-        coeffs_fit, cov = model.fit(xx, yy, init_guess, B_guess, bounds=bounds)
+        bounds = model.bounds(
+            yy, xx, init_guess, peak_center_max_range=peak_center_max_range
+        )
+        try:
+            coeffs_fit, cov = model.fit(
+                xx, yy, init_guess, B_guess, bounds=bounds
+            )
+        except Exception as err:
+            traceback.print_exc()
+            low, high = bounds
+            for i, init_val in enumerate(init_guess):
+                low_val = low[i]
+                high_val = high[i]
+                print(low_val, init_val, high_val, sep=' ; ')
+            import pdb; pdb.set_trace()
+            
         coeffs_pred = coeffs_fit[:-1]
         B_pred = coeffs_fit[-1] 
         yy_pred = model.model(xx, coeffs_pred, B_pred)
@@ -599,6 +626,50 @@ def fit_profiles(
         pbar.close()
         
     return df_profiles_fit, df_coeffs
+
+def radial_distances_nucleolus_nucleus(nucleolus_lab, nucleus_lab, debug=False):
+    nucleus_rp = skimage.measure.regionprops(nucleus_lab)
+    nucleolus_rp = skimage.measure.regionprops(nucleolus_lab)
+    
+    nucleolus_mapper = {obj.label: obj for obj in nucleolus_rp}
+    
+    df_dist = defaultdict(list)
+    for obj in nucleus_rp:
+        nucleus_contour = get_objContours(
+            obj, obj_image=obj.image.max(axis=0).astype(np.uint8)
+        )
+        rr, cc = nucleus_contour[:,1], nucleus_contour[:,0]
+        nucleolus_obj = nucleolus_mapper[obj.label]
+        zc, yc, xc = nucleolus_obj.centroid
+        for yN, xN in zip(rr, cc):
+            yy_line, xx_line = skimage.draw.line(round(yc), round(xc), yN, xN)
+            vals = nucleolus_lab[round(zc), yy_line, xx_line]
+            change_val_mask = vals[:-1] != vals[1:]
+            n_idxs = np.nonzero(change_val_mask)[0]
+            yn, xn = yy_line[n_idxs[0]], xx_line[n_idxs[0]]
+            
+            if debug:
+                nucleolus_contour = get_objContours(
+                    nucleolus_obj, 
+                    obj_image=nucleolus_obj.image.max(axis=0).astype(np.uint8)
+                )
+                plt.plot(xx_line, yy_line)
+                plt.plot(nucleolus_contour[:,0], nucleolus_contour[:,1])
+                plt.plot(cc, rr)
+                plt.plot([xn, xN, round(xc)], [yn, yN, round(yc)], 'r.')
+                plt.show()
+                import pdb; pdb.set_trace()
+            
+            dist = math.dist([yN, xN], [yn, xn])
+            df_dist['Cell_ID'].append(obj.label)
+            df_dist['nucleolus_to_nucleus_distance'].append(dist)
+            
+            dist_N = math.dist([yN, xN], [yc, xc])
+            df_dist['center_to_edge_nucleus_distance'].append(dist_N)
+    
+    df = pd.DataFrame(df_dist).set_index('Cell_ID')
+    return df
+            
         
         
 def keep_last_point_less_nans(df_group):
