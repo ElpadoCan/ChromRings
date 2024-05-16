@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 from chromrings import tables_path, data_path
 from chromrings import core, utils
 
+# '13_nucleolus_nucleus_profile'
+MUSCLES_NUCLEOLUS_DATA = '27_muscles_resol_limit'
+EXPERIMENT = None # 'Starved_with_spotmax_3D_seg'
 
 DEBUG = False
 
@@ -18,14 +21,17 @@ muscles_data_path = os.path.join(data_path, '27_muscles_resol_limit')
 
 # Read nucleolus edge profiles
 df_profiles_ne, _ = utils.read_df_profiles(
-    batch_name='13_nucleolus_nucleus_profile', stat_to_plot='mean', 
+    batch_name=MUSCLES_NUCLEOLUS_DATA, 
+    stat_to_plot='mean', 
     load_absolute_dist=True
 )
 df_profiles_ne_str = (
     df_profiles_ne
     .dropna()
-    .set_index('dist_perc')[['Starved_with_spotmax_3D_seg']]
+    .set_index('dist_perc')
 )
+if EXPERIMENT is not None:
+    df_profiles_ne_str = df_profiles_ne_str[[EXPERIMENT]]
 
 # Fit peaks to starved where we have nucleolus edge distance
 _, df_coeffs_ne = core.fit_profiles(

@@ -6,7 +6,7 @@ import pandas as pd
 from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     tables_path, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS, PLANE, 
-    LARGEST_NUCLEI_PERCENT
+    LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL
 )
 
 def listdir(path):
@@ -54,9 +54,20 @@ def read_df_profiles(
             f'_norm_how_{NORMALISE_HOW}'
             f'_absolut_dist_{load_absolute_dist}'
             f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
-            f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
             f'_{PLANE}plane'
         )
+        if LARGEST_NUCLEI_PERCENT is not None:
+            filename_prefix.replace(
+                f'_{PLANE}plane', 
+                f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
+                f'_{PLANE}plane'
+            )
+        if MIN_LENGTH_PROFILE_PXL > 0:
+            filename_prefix.replace(
+                f'_{PLANE}plane', 
+                f'_min_length_profile_pixels_{MIN_LENGTH_PROFILE_PXL}'
+                f'_{PLANE}plane'
+            )
         df_profiles, profiles_filename = _read_df_profiles_from_prefix(
             filename_prefix, stat_to_plot=stat_to_plot
         )

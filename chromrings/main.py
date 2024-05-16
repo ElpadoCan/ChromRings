@@ -17,7 +17,8 @@ from chromrings import (
     data_path, core, utils, tables_path, data_info_json_path,
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
-    PLANE, LARGEST_NUCLEI_PERCENT
+    PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 
+    ZEROIZE_INNER_LAB_EDGE
 )
 
 np.seterr(all='raise')
@@ -28,6 +29,14 @@ INSPECT_MEAN_PROFILE = False
 if LARGEST_NUCLEI_PERCENT is not None:
     answer = input(
         f'Are you sure you want to continue with {LARGEST_NUCLEI_PERCENT = }\n'
+        'Continue (y/[n])? '
+    )
+    if answer.lower() != 'y':
+        exit('Execution stopped')
+
+if MIN_LENGTH_PROFILE_PXL > 0:
+    answer = input(
+        f'Are you sure you want to continue with {MIN_LENGTH_PROFILE_PXL = }\n'
         'Continue (y/[n])? '
     )
     if answer.lower() != 'y':
@@ -111,6 +120,8 @@ for e, exp_folder in enumerate(exp_foldernames):
                 nucleolus_segm_filename = file
             # elif file.find('_segm_') != -1 and file.endswith('.npz'):
             #     segm_filename = file
+            elif file.endswith('segm_old_spotmax.npz'):
+                nucleolus_segm_filename = file
             elif file.endswith('segm.npz'):
                 segm_filename = file
             elif file.endswith('nu.csv'):
@@ -134,7 +145,10 @@ for e, exp_folder in enumerate(exp_foldernames):
             nucleolus_segm_filepath = os.path.join(
                 images_path, nucleolus_segm_filename
             )
-            nucleolus_segm_data = np.load(nucleolus_segm_filepath)['frame_0']
+            try:
+                nucleolus_segm_data = np.load(nucleolus_segm_filepath)['frame_0']
+            except Exception as err:
+                nucleolus_segm_data = np.load(nucleolus_segm_filepath)['arr_0']
         
         nucleolus_centers_df = None
         if nucleolus_centers_csv_filename is not None and USE_MANUAL_NUCLEOID_CENTERS:
@@ -168,7 +182,9 @@ for e, exp_folder in enumerate(exp_foldernames):
             inner_lab=nucleolus_segm_data,
             use_absolute_dist=USE_ABSOLUTE_DIST,
             centers_df=nucleolus_centers_df, 
-            largest_nuclei_percent=LARGEST_NUCLEI_PERCENT
+            largest_nuclei_percent=LARGEST_NUCLEI_PERCENT, 
+            min_length_profile_pixels=MIN_LENGTH_PROFILE_PXL, 
+            zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE
         )
 
         IDs = []
@@ -259,9 +275,20 @@ filename_prefix = (
     f'_norm_how_{NORMALISE_HOW}'
     f'_absolut_dist_{USE_ABSOLUTE_DIST}'
     f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
-    f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
     f'_{PLANE}plane'
 )
+if LARGEST_NUCLEI_PERCENT is not None:
+    filename_prefix.replace(
+        f'_{PLANE}plane', 
+        f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
+        f'_{PLANE}plane'
+    )
+if MIN_LENGTH_PROFILE_PXL > 0:
+    filename_prefix.replace(
+        f'_{PLANE}plane', 
+        f'_min_length_profile_pixels_{MIN_LENGTH_PROFILE_PXL}'
+        f'_{PLANE}plane'
+    )
 
 filename_prefix_skew = filename_prefix.replace(
     'norm_mean_profile', 'norm_skew_profile'

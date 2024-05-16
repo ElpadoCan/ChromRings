@@ -23,7 +23,8 @@ from chromrings import tables_path, figures_path
 from chromrings import (
     data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST, 
     NORMALISE_AVERAGE_PROFILE, NORMALIZE_EVERY_PROFILE, 
-    USE_MANUAL_NUCLEOID_CENTERS, LARGEST_NUCLEI_PERCENT
+    USE_MANUAL_NUCLEOID_CENTERS, LARGEST_NUCLEI_PERCENT, 
+    MIN_LENGTH_PROFILE_PXL
 )
 from chromrings.core import keep_last_point_less_nans
 
@@ -41,7 +42,16 @@ if LARGEST_NUCLEI_PERCENT is not None:
     if answer.lower() != 'y':
         exit('Execution stopped')
 
+if MIN_LENGTH_PROFILE_PXL > 0:
+    answer = input(
+        f'Are you sure you want to continue with {MIN_LENGTH_PROFILE_PXL = }\n'
+        'Continue (y/[n])? '
+    )
+    if answer.lower() != 'y':
+        exit('Execution stopped')
+
 df_profiles, profiles_filename = utils.read_df_profiles(stat_to_plot=STAT_TO_PLOT)
+
 print('*'*60)
 answer = input(
     f'Plotting from table: {profiles_filename}\n'
@@ -308,8 +318,19 @@ for group_name in figs:
                 pdf_filename = f'{pdf_filename}_'
             pdf_filename = f'{pdf_filename}with_manual_centroids'
         if LARGEST_NUCLEI_PERCENT is not None:
-            pdf_filename = f'{pdf_filename}_only_largest_nuclei_{int(LARGEST_NUCLEI_PERCENT*100)}_perc'
+            pdf_filename = (
+                f'{pdf_filename}_only_largest_nuclei_'
+                f'{int(LARGEST_NUCLEI_PERCENT*100)}_perc'
+            )
+        if MIN_LENGTH_PROFILE_PXL > 0:
+            pdf_filename = (
+                f'{pdf_filename}_min_length_profile_pixels'
+                f'_{MIN_LENGTH_PROFILE_PXL}'
+            )
+        
         pdf_filepath = os.path.join(figures_path, f'{pdf_filename}.pdf')
         fig.savefig(pdf_filepath)
+        print('-'*100)
+        print(f'Figure saved at "{pdf_filepath}"')
 
 plt.show()

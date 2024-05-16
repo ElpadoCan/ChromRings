@@ -61,8 +61,7 @@ def radial_profiles(
         use_absolute_dist=False, 
         centers_df=None, 
         largest_nuclei_percent=None, 
-        min_length_profile_pixels=0, 
-        zeroize_inner_lab_edge=False
+        min_length_profile_pixels=0
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -114,9 +113,7 @@ def radial_profiles(
     min_length_profile_pixels : int, optional
         Minimum length of single profile that will be used to get the mean 
         single-cell profile. Default is 0
-    zeroize_inner_lab_edge: bool, optional
-        If `True`, the distance along the profile will be zeroised to the 
-        edge of the `inner_lab`. 
+    
     
     Returns
     -------
@@ -185,9 +182,7 @@ def radial_profiles(
             weighted_centroid = obj.weighted_centroid
         else:
             inner_obj = skimage.measure.regionprops(inner_lab_masked)[0]
-            _, yc, xc = inner_obj.centroid   
-            zc, _, _ = obj.weighted_centroid
-            weighted_centroid = (zc, yc, xc)
+            weighted_centroid = inner_obj.centroid       
             
         if len(weighted_centroid) == 3:
             zc, yc, xc = weighted_centroid
@@ -264,11 +259,11 @@ def radial_profiles(
                 inner_yy, inner_xx = np.where(inner_contours_lab == inner_val)
                 inner_y, inner_x = inner_yy[0], inner_xx[0]
                 
-            # Normalize distance to object edge
-            if inner_lab is not None and zeroize_inner_lab_edge:
-                y0, x0 = inner_y, inner_x
-            else:
-                y0, x0 = y1, x1
+            # # Normalize distance to object edge
+            # if inner_lab is not None:
+            #     y0, x0 = inner_y, inner_x
+            # else:
+            y0, x0 = y1, x1
             xy_arr = np.column_stack((xx_line, yy_line))
             diff = np.subtract(xy_arr, (x0, y0))
             dist = np.linalg.norm(diff, axis=1)
@@ -345,9 +340,6 @@ def radial_profiles(
         radial_df = obj.radial_df[cols]
         if min_length_profile_pixels > 0:
             radial_df_count = obj.radial_df[cols].count()
-            min_count_mask = radial_df_count>min_length_profile_pixels
-            radial_df_min_count = radial_df_count[min_count_mask]
-            radial_df = radial_df[radial_df_min_count.index.to_list()]
 
         obj.mean_radial_profile = radial_df.mean(axis=1)
         obj.stds_radial_profile = radial_df.std(axis=1)

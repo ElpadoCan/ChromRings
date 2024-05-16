@@ -433,5 +433,23 @@
         "colors": {
             "auxin": "orangered"
         }
+    },
+    "27_muscles_resol_limit": {
+        "folder_path": "data/27_muscles_resol_limit",
+        "experiments": [
+            "Pol_I_degradation", "WT_starved", "let363"
+        ],
+        "channel": [
+            "SDC488", "SDC488", "SDC488"
+        ],
+        "plots": [
+            "Pol_I_degradation;;WT_starved;;let363"
+        ], 
+        "figs": [""], 
+        "colors": {
+            "Pol_I_degradation": "deeppink", 
+            "WT_starved": "orangered", 
+            "let363": "orange"
+        }
     }
 }
