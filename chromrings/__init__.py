@@ -41,7 +41,7 @@ ZEROIZE_INNER_LAB_EDGE = False
 USE_MANUAL_NUCLEOID_CENTERS = False
 PLANE = 'xy' # 'xy', 'yz', or 'xz'
 LARGEST_NUCLEI_PERCENT = None # 0.2 # None
-MIN_LENGTH_PROFILE_PXL = 6
+MIN_LENGTH_PROFILE_PXL = 9
 
 # '27_muscles_resol_limit'
 # '25_hypoderm', '26_muscles'

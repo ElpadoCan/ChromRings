@@ -276,19 +276,25 @@ def radial_profiles(
             if not use_absolute_dist:
                 full_dist = math.dist([y2, x2], [y0, x0]) 
                 dist_100 = full_dist - extra_radius
-                try:
-                    dist = dist/dist_100
-                except Exception as e:
-                    import pdb; pdb.set_trace()
+                dist = dist/dist_100
                 dist_perc = np.round(dist*100).astype(int)
             else:
                 dist_perc = np.round(dist).astype(int)
+                dist_perc_out_inner = dist_perc.copy()
+            
+            if min_length_profile_pixels > 0:
+                profile_outer_len = math.dist([y2, x2], [y1, x1])
+                if inner_lab is not None:
+                    inner_len = math.dist([inner_y, inner_x], [y1, x1])
+                    profile_outer_len -= inner_len
+                if profile_outer_len < min_length_profile_pixels:
+                    continue
             
             dist_perc[:zero_dist_idx] *= - 1
-            obj.radial_profiles.append(
-                {'x': xx_line, 'y': yy_line, 'values': vals, 
-                 'norm_dist': dist_perc}
-            )
+            obj.radial_profiles.append({
+                'x': xx_line, 'y': yy_line, 'values': vals, 
+                'norm_dist': dist_perc
+            })
 
             if normalize_every_profile:
                 vals = vals/vals.max()
@@ -302,10 +308,10 @@ def radial_profiles(
                 rs = f'{resample_bin_size_dist}ns'
                 resampled = _df.resample(rs, label='right').mean().dropna()
                 dist_perc = resampled.index.astype(np.int64)
-                obj.resampled_radial_profiles.append(
-                    {'values': resampled['value'].values, 
-                     'norm_dist': dist_perc}
-                )
+                obj.resampled_radial_profiles.append({
+                    'values': resampled['value'].values, 
+                    'norm_dist': dist_perc
+                })
                 vals = resampled['value'].values
 
             all_dist.update(dist_perc)
@@ -343,13 +349,11 @@ def radial_profiles(
         obj.radial_df = obj.radial_df.astype(float)
         
         radial_df = obj.radial_df[cols]
-        if min_length_profile_pixels > 0:
-            radial_df_count = obj.radial_df[cols].count()
-            min_count_mask = radial_df_count>min_length_profile_pixels
-            radial_df_min_count = radial_df_count[min_count_mask]
-            radial_df = radial_df[radial_df_min_count.index.to_list()]
-
         obj.mean_radial_profile = radial_df.mean(axis=1)
+        if len(obj.mean_radial_profile) == 0:
+            obj.mean_radial_profile = None
+            continue
+        
         obj.stds_radial_profile = radial_df.std(axis=1)
         obj.CVs_radial_profile = (
             (obj.stds_radial_profile/obj.mean_radial_profile)
@@ -400,10 +404,15 @@ def radial_profiles(
             plt.show()
             import pdb; pdb.set_trace()
 
+        
+        
         '''Describe mean_radial_profile distribution'''
         df_norm_distribution = obj.mean_radial_profile/obj.mean_radial_profile.max()
         x = df_norm_distribution.index.values/100
-        obj.radial_profile_argmax = df_norm_distribution.idxmax()/100
+        try:
+            obj.radial_profile_argmax = df_norm_distribution.idxmax()/100
+        except Exception as err:
+            import pdb; pdb.set_trace()
 
         tot_samples = df_norm_distribution.values.sum()
         frequency = df_norm_distribution.values

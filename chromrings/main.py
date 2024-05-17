@@ -198,6 +198,8 @@ for e, exp_folder in enumerate(exp_foldernames):
         for obj in rp:
             if not hasattr(obj, 'mean_radial_profile'):
                 continue
+            if obj.mean_radial_profile is None:
+                continue
             obj_series.append(obj.mean_radial_profile)    
             obj_series_skew.append(obj.skews_radial_profile) 
             obj_series_CV.append(obj.CVs_radial_profile)  
