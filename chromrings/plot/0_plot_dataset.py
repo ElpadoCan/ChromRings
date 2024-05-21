@@ -13,9 +13,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 
+import statsmodels.api as sm
+
 import scipy.stats
 
 from cellacdc.plot import heatmap
+from cellacdc.myutils import pairwise
 
 # import diptest
 
@@ -298,11 +301,53 @@ for group_name in figs:
             alternative='two-sided'
         )
         pvalues = permutation_result.pvalue
-        effect_sizes = cohen_effect_size(*data_test)
-        ax[2, agg_col].plot(xx_plot, -np.log10(pvalues))
-        ax[2, agg_col].set_xlabel(x_label)
-        ax[2, agg_col].set_ylabel('-$log_{10}(p)$')
+        adjusted_pvalues = sm.stats.multipletests(
+            pvalues, 
+            alpha=0.05, 
+            method='bonferroni', 
+            is_sorted=False, 
+            returnsorted=False
+        )[1]
         
+        quantiles = np.quantile(xx_plot, q=(1/3, 2/3, 1.0))
+        bin_right_idxs = [0]
+        for quant in quantiles:
+            right_idx = np.abs(np.array(xx_plot) - quant).argmin()
+            bin_right_idxs.append(right_idx)
+        
+        y_pvalues = -np.log10(adjusted_pvalues)
+        colors_areas = sns.color_palette()
+        b = 0
+        combined_pvalues = []
+        for bin_left_idx, bin_right_idx in pairwise(bin_right_idxs):
+            p_values_bin = adjusted_pvalues[bin_left_idx:bin_right_idx]
+        
+            combined_pvalue = scipy.stats.combine_pvalues(
+                p_values_bin, method='fisher'
+            ).pvalue
+            
+            x_left = xx_plot[bin_left_idx]
+            x_right = xx_plot[bin_right_idx]
+            x_middle = x_left + (x_right-x_left)/2
+            
+            combined_pvalues.append(combined_pvalue)
+            
+            ax[2, agg_col].axvspan(
+                x_left, x_right, color=colors_areas[b], alpha=0.3
+            )
+            ax[2, agg_col].text(
+                x_middle, np.max(y_pvalues)+0.1, f'{combined_pvalue:.4g}', 
+                ha='center'
+            )
+            b += 1                
+        
+        ax[2, agg_col].plot(xx_plot, y_pvalues)
+        ax[2, agg_col].set_xlabel(x_label)
+        ax[2, agg_col].set_ylabel('-$log_{10}(p)$ (adjusted)')
+        ymin, ymax = ax[2, agg_col].get_ylim()
+        ax[2, agg_col].set_ylim((ymin, ymax+0.3))
+        
+        effect_sizes = cohen_effect_size(*data_test)
         ax[2, agg_col+1].plot(xx_plot, np.abs(effect_sizes))
         ax[2, agg_col+1].set_xlabel(x_label)
         ax[2, agg_col+1].set_ylabel('Effect size (Cohen)')
