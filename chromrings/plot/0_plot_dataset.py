@@ -315,6 +315,8 @@ for group_name in figs:
             right_idx = np.abs(np.array(xx_plot) - quant).argmin()
             bin_right_idxs.append(right_idx)
         
+        bin_right_idxs[-1] += 1
+        print(bin_right_idxs)
         y_pvalues = -np.log10(adjusted_pvalues)
         colors_areas = sns.color_palette()
         b = 0
@@ -323,17 +325,17 @@ for group_name in figs:
             p_values_bin = adjusted_pvalues[bin_left_idx:bin_right_idx]
         
             combined_pvalue = scipy.stats.combine_pvalues(
-                p_values_bin, method='fisher'
+                p_values_bin, method='pearson'
             ).pvalue
             
             x_left = xx_plot[bin_left_idx]
-            x_right = xx_plot[bin_right_idx]
+            x_right = xx_plot[bin_right_idx-1]
             x_middle = x_left + (x_right-x_left)/2
             
             combined_pvalues.append(combined_pvalue)
             
             ax[2, agg_col].axvspan(
-                x_left, x_right, color=colors_areas[b], alpha=0.3
+                x_left-2.5, x_right+2.5, color=colors_areas[b], alpha=0.3
             )
             ax[2, agg_col].text(
                 x_middle, np.max(y_pvalues)+0.1, f'{combined_pvalue:.4g}', 
