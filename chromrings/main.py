@@ -280,13 +280,13 @@ filename_prefix = (
     f'_{PLANE}plane'
 )
 if LARGEST_NUCLEI_PERCENT is not None:
-    filename_prefix.replace(
+    filename_prefix = filename_prefix.replace(
         f'_{PLANE}plane', 
         f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
         f'_{PLANE}plane'
     )
 if MIN_LENGTH_PROFILE_PXL > 0:
-    filename_prefix.replace(
+    filename_prefix = filename_prefix.replace(
         f'_{PLANE}plane', 
         f'_min_length_profile_pixels_{MIN_LENGTH_PROFILE_PXL}'
         f'_{PLANE}plane'

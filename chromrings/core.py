@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
+from cellacdc.plot import imshow
+
 pwd_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_objContours(obj, obj_image=None, all=False):
@@ -197,7 +199,12 @@ def radial_profiles(
             if inner_lab is not None:
                 # inner_lab_2D = inner_lab_masked[round(zc)]
                 inner_lab_2D = inner_lab_masked.max(axis=0)
-            obj_z = skimage.measure.regionprops(lab_2D)[0]
+            
+            try:
+                obj_z = skimage.measure.regionprops(lab_2D)[0]
+            except Exception as err:
+                import pdb; pdb.set_trace()
+                continue
             img_data_2D = img_data[round(zc)]
         else:
             yc, xc = weighted_centroid
@@ -256,11 +263,12 @@ def radial_profiles(
                 try:
                     inner_val = inner_vals[inner_vals>0][0]
                 except Exception as e:
-                    fig, ax = plt.subplots()
-                    ax.imshow(inner_contours_lab)
-                    ax.plot(xx_line, yy_line)
-                    plt.show()
-                    import pdb; pdb.set_trace()
+                    # fig, ax = plt.subplots()
+                    # ax.imshow(inner_contours_lab)
+                    # ax.plot(xx_line, yy_line)
+                    # plt.show()
+                    # import pdb; pdb.set_trace()
+                    continue
                 inner_yy, inner_xx = np.where(inner_contours_lab == inner_val)
                 inner_y, inner_x = inner_yy[0], inner_xx[0]
                 
