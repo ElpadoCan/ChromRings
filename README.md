@@ -1,5 +1,5 @@
 # ChromRings
-Python package to quantify chromatin reorganisation in C. Elegans upon starvation. 
+Python package to quantify chromatin reorganisation in *C. elegans* upon starvation. 
 
 ## Installation
 
