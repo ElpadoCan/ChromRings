@@ -41,7 +41,7 @@ ZEROIZE_INNER_LAB_EDGE = False
 USE_MANUAL_NUCLEOID_CENTERS = False # True False
 PLANE = 'xy' # 'xy', 'yz', or 'xz'
 LARGEST_NUCLEI_PERCENT = None # 0.2 # None
-MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
+MIN_LENGTH_PROFILE_PXL = 9 # 9 (goes with 27_muscles_resol_limit) # 0
 
 # '27_muscles_resol_limit'
 # '25_hypoderm', '26_muscles'
@@ -55,7 +55,7 @@ MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
-batch_name = '13_nucleolus_nucleus_profile' 
+batch_name = '27_muscles_resol_limit' 
 
 # To run on 15.06.2023: 
 # 2, 4, 5, 8, 10 
