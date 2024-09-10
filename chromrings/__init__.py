@@ -33,6 +33,9 @@ data_path = os.path.join(pwd_path, 'data')
 tables_path = os.path.join(pwd_path, 'tables')
 figures_path = os.path.join(pwd_path, 'figures')
 
+os.makedirs(tables_path, exist_ok=True)
+os.makedirs(figures_path, exist_ok=True)
+
 NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True # False with 13_nucleolus_nucleus_profile
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo' # None with 13_nucleolus_nucleus_profile
