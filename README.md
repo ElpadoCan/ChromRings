@@ -42,7 +42,15 @@ In the example above the folder `data/1_test_3D_vs_2D_01-02-2023` contains the s
 
 At the entry `"plots"` you can define the pairs of conditions you want to compare. In any case, you will get one heatmap for each condition (one condition, one experiment folder). 
 
-Once you modified the JSON file, you can run the analysis by running the `ChromRings\chromrings\main.py` file (we recommend using VS code to run Python scripts, alternatively you can run them in the terminal with the command `python "path to python file"`. To plot the results run the `ChromRings\chromrings\0_plot_dataset.py` file. 
+The JSON file will contain information about all the experiments you want or you will analyse. Once you modify the JSON file, you need to tell the software which experiment you want to analyse. To do so you need to modify the following variable in the `ChromRings\chromrings\__init__.py`:
+
+```
+batch_name = '1_test_3D_vs_2D' 
+```
+
+where the `batch_name` is the experiment you want to analyse, in this example the `1_test_3D_vs_2D` experiment.
+
+Next, you can run the analysis by running the `ChromRings\chromrings\main.py` file (we recommend using VS code to run Python scripts, alternatively you can run them in the terminal with the command `python "path to python file"`. To plot the results run the `ChromRings\chromrings\0_plot_dataset.py` file. 
 
 ## Citing
 
