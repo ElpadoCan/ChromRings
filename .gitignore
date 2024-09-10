@@ -4,6 +4,7 @@ documents
 chromrings/_version.py
 chromrings/test.py
 desktop.ini
+.setup.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

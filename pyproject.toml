@@ -7,6 +7,53 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "chromrings"
+description = "A Python package to analyse chromatin rings formed in C.Elegans upon starvation"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: BSD License",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Operating System :: Unix",
+  "Operating System :: MacOS",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Image Processing",
+  "Topic :: Scientific/Engineering :: Visualization",
+  "Topic :: Utilities",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "cellacdc@git+https://github.com/SchmollerLab/Cell_ACDC",
+  "pyarrow",
+  "pandas<2.2.0",
+  "statsmodels",
+]
+dynamic = [
+    "version",
+]
+
+[[project.authors]]
+name = "Francesco Padovani"
+email = "francesco.padovani@helmholtz-munich.de"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+"GitHub page" = "https://github.com/SchmollerLab/Cell_ACDC"
+"Author contact" = "https://schmollerlab.com/francescopadovani"
+"Schmoller lab" = "https://schmollerlab.com/"
+
 [tool.setuptools_scm]
 write_to = "chromrings/_version.py"
 
@@ -14,4 +61,13 @@ write_to = "chromrings/_version.py"
 [tool.pytest.ini_options]
 filterwarnings = [
     "ignore::DeprecationWarning"
+]
+
+[tool.setuptools.packages.find]
+exclude = [
+    "data",
+    "tables",
+    "figures",
+    "documents",
+    "notebooks"
 ]
