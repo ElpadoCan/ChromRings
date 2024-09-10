@@ -50,7 +50,7 @@ batch_name = '1_test_3D_vs_2D'
 
 where the `batch_name` is the experiment you want to analyse, in this example the `1_test_3D_vs_2D` experiment.
 
-Next, you can run the analysis by running the `ChromRings\chromrings\main.py` file (we recommend using VS code to run Python scripts, alternatively you can run them in the terminal with the command `python "path to python file"`. To plot the results run the `ChromRings\chromrings\0_plot_dataset.py` file. 
+Next, you can run the analysis by running the `ChromRings\chromrings\main.py` file (we recommend using VS code to run Python scripts, alternatively you can run them in the terminal with the command `python "path to python file"`. To plot the results run the `ChromRings\chromrings\plot\0_plot_dataset.py` file. 
 
 ## Citing
 
