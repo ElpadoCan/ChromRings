@@ -20,8 +20,6 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
-from cellacdc.plot import imshow
-
 pwd_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_objContours(obj, obj_image=None, all=False):
