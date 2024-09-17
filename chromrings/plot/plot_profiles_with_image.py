@@ -39,7 +39,7 @@ def plot(batch_name):
     batch_info = data_info[batch_name]
     exp_foldernames = batch_info['experiments']
     channel_names = batch_info['channel']
-    batch_path = os.path.join(data_path, batch_info['folder_path'].split('/')[1])
+    batch_path = os.path.join(data_path, *batch_info['folder_path'].split('/')[1:])
     pdf = PdfPages(os.path.join(
         figures_path, f'{batch_name}_{EXP_TO_PLOT}_profiles_with_image.pdf')
     )
@@ -54,7 +54,9 @@ def plot(batch_name):
             channel_name = channel_names
         exp_info[exp] = {}
         df_profiles_exp = df_profiles[exp]
-        pos_foldernames = df_profiles_exp.columns.get_level_values(0).unique().to_list()
+        pos_foldernames = (
+            df_profiles_exp.columns.get_level_values(0).unique().to_list()
+        )
         for pos in tqdm(pos_foldernames, ncols=100):
             images_path = os.path.join(exp_path, pos, 'Images')
             for file in utils.listdir(images_path):
@@ -106,19 +108,7 @@ def plot(batch_name):
 
 if __name__ == '__main__':
     batch_names = (
-        # '2_Pol_I_II_III', 
-        # '3_Daf15', 
-        # '4_WT_refed', 
-        # '5_WT_starved_DNA_vs_histone', 
-        # '6_WT_fed_DNA_vs_histone', 
-        # '7_WT_starved_vs_fed_histone', 
-        # '8_raga1_all_categories', 
-        # '9_raga1', 
-        '10_Tir_1', 
-        '12_adults', 
-        '11_hypoderm', 
-        '14_WT_raga1_with_degraded_Pol_I', 
-        '15_muscles_fed_vs_starved_histone', 
+        '24h recovery', 
     )
     for batch_name in batch_names:
         plot(batch_name)
