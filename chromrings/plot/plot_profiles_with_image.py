@@ -40,9 +40,10 @@ def plot(batch_name):
     exp_foldernames = batch_info['experiments']
     channel_names = batch_info['channel']
     batch_path = os.path.join(data_path, *batch_info['folder_path'].split('/')[1:])
-    pdf = PdfPages(os.path.join(
-        figures_path, f'{batch_name}_{EXP_TO_PLOT}_profiles_with_image.pdf')
+    pdf_filepath = os.path.join(
+        figures_path, f'{batch_name}_{EXP_TO_PLOT}_profiles_with_image.pdf'
     )
+    pdf = PdfPages(pdf_filepath)
     exp_info = {}
     for e, exp in enumerate(exp_foldernames):
         if EXP_TO_PLOT is not None and exp != EXP_TO_PLOT:
@@ -78,13 +79,18 @@ def plot(batch_name):
             for c, col in enumerate(df_profiles_pos.columns):
                 ID = int(re.findall(r'ID_(\d+)_mean_radial_profile', col)[0])
                 obj = rp[ID]
-                zc, yc, xc = obj.weighted_centroid
-                _, yc_local, xc_local = obj.centroid_weighted_local
-                lab_3D[:] = 0
-                lab_3D[obj.slice][obj.image] = ID
-                lab_2D = lab_3D[round(zc)]
+                yc_local, xc_local = obj.centroid_weighted_local[-2:]
+                if len(obj.weighted_centroid) == 3:
+                    zc, yc, xc = obj.weighted_centroid
+                    lab_3D[:] = 0
+                    lab_3D[obj.slice][obj.image] = ID
+                    lab_2D = lab_3D[round(zc)]
+                    img_2D = img[round(zc)]
+                else:
+                    lab_2D = lab_3D
+                    img_2D = img
                 obj_2D = skimage.measure.regionprops(lab_2D)[0]
-                obj_intens_img = img[round(zc)][obj_2D.slice]
+                obj_intens_img = img_2D[obj_2D.slice]
                 if c > 11:
                     break
                 axis = ax[c]
@@ -105,6 +111,13 @@ def plot(batch_name):
     # mng = plt.get_current_fig_manager()
     # mng.window.showMaximized()
     plt.close()
+    print('='*100)
+    print(f'Done. Plots with images saved at "{pdf_filepath}"')
+    print('='*100)
+    try:
+        utils.open_file(pdf_filepath)
+    except Exception as err:
+        pass
 
 if __name__ == '__main__':
     batch_names = (

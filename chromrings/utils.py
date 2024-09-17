@@ -137,3 +137,21 @@ def read_df_profiles(
         return df_profiles, profiles_filename 
     except Exception as e:
         raise e
+
+def open_file(filepath):
+    import sys
+    import subprocess
+    
+    if sys.platform=='win32':
+        os.startfile(filepath)
+
+    elif sys.platform=='darwin':
+        subprocess.Popen(['open', fr'"{filepath}"'])
+
+    else:
+        try:
+            subprocess.Popen(['xdg-open', fr'"{filepath}"'])
+        except OSError:
+            pass
+            # er, think of something else to try
+            # xdg-open *should* be supported by recent Gnome, KDE, Xfce
