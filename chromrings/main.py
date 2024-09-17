@@ -158,8 +158,9 @@ for e, exp_folder in enumerate(exp_foldernames):
             nucleolus_centers_df = (
                 pd.read_csv(nucleolus_centers_csv_filepath)
                 .set_index('Cell_ID')
+                .dropna(axis=1)
             )
-
+        
         segm_filepath = os.path.join(images_path, segm_filename)
         image_filepath = os.path.join(images_path, image_filename)
 

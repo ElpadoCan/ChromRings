@@ -175,11 +175,15 @@ def radial_profiles(
         
         if centers_df is not None and obj.label in centers_df.index:
             # Center coordinates are provided as input
-            center_df = centers_df.loc[obj.label]
-            zc = center_df['z']
+            center_df = centers_df.loc[obj.label]                
             yc = center_df['y']
             xc = center_df['x']
-            weighted_centroid = (zc, yc, xc)
+            weighted_centroid = (yc, xc)
+            try:
+                zc = center_df['z']
+                weighted_centroid = (zc, yc, xc)
+            except KeyError as err:
+                pass
         elif inner_lab is None:
             # Use weighted centroid
             weighted_centroid = obj.weighted_centroid
@@ -188,7 +192,7 @@ def radial_profiles(
             _, yc, xc = inner_obj.centroid   
             zc, _, _ = obj.weighted_centroid
             weighted_centroid = (zc, yc, xc)
-            
+        
         if len(weighted_centroid) == 3:
             zc, yc, xc = weighted_centroid
             lab_2D = lab.copy()
@@ -201,7 +205,6 @@ def radial_profiles(
             try:
                 obj_z = skimage.measure.regionprops(lab_2D)[0]
             except Exception as err:
-                import pdb; pdb.set_trace()
                 continue
             img_data_2D = img_data[round(zc)]
         else:
