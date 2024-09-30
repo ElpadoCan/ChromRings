@@ -4,13 +4,14 @@ import re
 
 from tqdm import tqdm
 
+import pandas as pd
 import numpy as np
 import skimage.io
 import skimage.measure
 
 from chromrings import data_path, figures_path
 from chromrings import (
-    data_info_json_path, utils, USE_ABSOLUTE_DIST
+    data_info_json_path, utils, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS
 )
 
 import matplotlib.pyplot as plt
@@ -41,7 +42,10 @@ def plot(batch_name):
     channel_names = batch_info['channel']
     batch_path = os.path.join(data_path, *batch_info['folder_path'].split('/')[1:])
     pdf_filepath = os.path.join(
-        figures_path, f'{batch_name}_{EXP_TO_PLOT}_profiles_with_image.pdf'
+        figures_path, 
+        f'{batch_name}_{EXP_TO_PLOT}_profiles_with_image'
+        f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
+        '.pdf'
     )
     pdf = PdfPages(pdf_filepath)
     exp_info = {}
@@ -60,12 +64,32 @@ def plot(batch_name):
         )
         for pos in tqdm(pos_foldernames, ncols=100):
             images_path = os.path.join(exp_path, pos, 'Images')
+            nucleolus_centers_csv_filename = None
+            lab = None
+            img = None
             for file in utils.listdir(images_path):
                 file_path = os.path.join(images_path, file)
                 if file.endswith(f'{channel_name}.tif'):
                     img = skimage.io.imread(file_path)
                 elif file.endswith('segm.npz'):
                     lab = np.load(file_path)['arr_0']
+                elif file.endswith('nu.csv'):
+                    nucleolus_centers_csv_filename = file
+            
+            load_manual_centr = (
+                nucleolus_centers_csv_filename is not None
+                and USE_MANUAL_NUCLEOID_CENTERS
+            )
+            nucleolus_centers_df = None
+            if load_manual_centr:
+                nucleolus_centers_csv_filepath = os.path.join(
+                    images_path, nucleolus_centers_csv_filename
+                )
+                nucleolus_centers_df = (
+                    pd.read_csv(nucleolus_centers_csv_filepath)
+                    .set_index('Cell_ID')
+                    .dropna(axis=1)
+                )
             
             img_data_max = img.max()
             intensity_image = -img + img_data_max
@@ -80,15 +104,32 @@ def plot(batch_name):
                 ID = int(re.findall(r'ID_(\d+)_mean_radial_profile', col)[0])
                 obj = rp[ID]
                 yc_local, xc_local = obj.centroid_weighted_local[-2:]
-                if len(obj.weighted_centroid) == 3:
+                zc = None
+                if nucleolus_centers_df is not None:
+                    # Center coordinates are provided as input
+                    center_df = nucleolus_centers_df.loc[obj.label]                
+                    yc = center_df['y']
+                    xc = center_df['x']
+                    weighted_centroid = (yc, xc)
+                    try:
+                        zc = center_df['z']
+                        weighted_centroid = (zc, yc, xc)
+                    except KeyError as err:
+                        zc = None                    
+                elif len(obj.weighted_centroid) == 3:
                     zc, yc, xc = obj.weighted_centroid
+                else:
+                    yc, xc = obj.weighted_centroid
+                
+                if zc is None:
+                    lab_2D = lab_3D
+                    img_2D = img
+                else:
                     lab_3D[:] = 0
                     lab_3D[obj.slice][obj.image] = ID
                     lab_2D = lab_3D[round(zc)]
                     img_2D = img[round(zc)]
-                else:
-                    lab_2D = lab_3D
-                    img_2D = img
+                    
                 obj_2D = skimage.measure.regionprops(lab_2D)[0]
                 obj_intens_img = img_2D[obj_2D.slice]
                 if c > 11:
@@ -120,8 +161,5 @@ def plot(batch_name):
         pass
 
 if __name__ == '__main__':
-    batch_names = (
-        '24h recovery', 
-    )
-    for batch_name in batch_names:
-        plot(batch_name)
+    from chromrings import batch_name
+    plot(batch_name)
