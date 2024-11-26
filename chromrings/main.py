@@ -18,7 +18,7 @@ from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
     PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 
-    ZEROIZE_INNER_LAB_EDGE
+    ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST
 )
 
 np.seterr(all='raise')
@@ -43,7 +43,7 @@ if MIN_LENGTH_PROFILE_PXL > 0:
         exit('Execution stopped')
 
 if not USE_ABSOLUTE_DIST:
-    resample_bin_size_dist = 5
+    resample_bin_size_dist = RESAMPLE_BIN_SIZE_DIST
 else:
     resample_bin_size_dist = 1
 
@@ -185,7 +185,8 @@ for e, exp_folder in enumerate(exp_foldernames):
             centers_df=nucleolus_centers_df, 
             largest_nuclei_percent=LARGEST_NUCLEI_PERCENT, 
             min_length_profile_pixels=MIN_LENGTH_PROFILE_PXL, 
-            zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE
+            zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE,
+            concatenate_profiles=CONCATENATE_PROFILES
         )
 
         IDs = []
@@ -279,6 +280,7 @@ filename_prefix = (
     f'_absolut_dist_{USE_ABSOLUTE_DIST}'
     f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
     f'_{PLANE}plane'
+    f'_concat_profiles_{CONCATENATE_PROFILES}'
 )
 if LARGEST_NUCLEI_PERCENT is not None:
     filename_prefix = filename_prefix.replace(

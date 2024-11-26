@@ -20,6 +20,16 @@
             "1259 (+) auxin 24h recovery": "firebrick", 
             "1259 x 1223 (+) auxin 24h recovery": "darkturquoise"
         }
+    },
+    "28_test_bin_size": {
+        "folder_path": "data/28_test_bin_size",
+        "experiments": ["fed"],
+        "channel": "w1SDC488",
+        "plots": ["fed"],
+        "figs": [""],
+        "colors": {
+            "fed": "darkturquoise"
+        }
     }
 }
 

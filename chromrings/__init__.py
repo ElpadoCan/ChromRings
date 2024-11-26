@@ -4,6 +4,75 @@ import inspect
 from datetime import datetime
 from pprint import pprint
 
+import traceback
+from typing import Iterable
+
+def _warn_ask_install_package(commands: Iterable[str], note_txt=''):
+    open_str = '='*100
+    sep_str = '-'*100
+    commands_txt = '\n'.join([f'  {command}' for command in commands])
+    text = (
+        f'ChromRings needs to run the following commands{note_txt}:\n\n'
+        f'{commands_txt}\n\n'
+    )
+    question = (
+        'How do you want to proceed?: '
+        '1) Run the commands now. '
+        'q) Quit, I will run the commands myself (1/q): '
+    )
+    print(open_str)
+    print(text)
+    
+    message_on_exit = (
+        '[WARNING]: Execution aborted. Run the following commands before '
+        f'running ChromRings again:\n\n{commands_txt}\n'
+    )
+    msg_on_invalid = (
+        '$answer is not a valid answer. '
+        'Type "1" to run the commands now or "q" to quit.'
+    )
+    try:
+        while True:
+            answer = input(question)
+            if answer == 'q':
+                print(open_str)
+                exit(message_on_exit)
+            elif answer == '1':
+                break
+            else:
+                print(sep_str)
+                print(msg_on_invalid.replace('$answer', answer))
+                print(sep_str)
+    except Exception as err:
+        traceback.print_exc()
+        print(open_str)
+        print(message_on_exit)
+
+def _run_pip_commands(commands: Iterable[str]):
+    import subprocess
+    for command in commands:
+        try:
+            subprocess.check_call([sys.executable, '-m', *command.split()])
+        except Exception as err:
+            pass
+
+try:
+    import cellacdc
+except Exception as err:
+    print('ChromRings needs to install Cell-ACDC')
+    commands = (
+        'pip install git+https://github.com/SchmollerLab/Cell_ACDC.git', 
+    )
+    _warn_ask_install_package(
+        commands, note_txt=' (to install Cell-ACDC package)'
+    )
+    try:
+        _run_pip_commands(commands)
+    except Exception as err:
+        commands = ('pip install cellacdc',)
+        _run_pip_commands(commands)
+    print('Cell-ACDC installed')
+
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -45,6 +114,8 @@ USE_MANUAL_NUCLEOID_CENTERS = False # True False
 PLANE = 'xy' # 'xy', 'yz', or 'xz'
 LARGEST_NUCLEI_PERCENT = None # 0.2 # None
 MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
+CONCATENATE_PROFILES = True # True if profiles should go -1.0 ,0, 1.0 where 0 is center
+RESAMPLE_BIN_SIZE_DIST = 10
 
 # '24h recovery'
 # '27_muscles_resol_limit'
@@ -59,7 +130,7 @@ MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
 # '7_WT_starved_vs_fed_histone', '6_WT_fed_DNA_vs_histone'
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
-batch_name = '24h recovery' 
+batch_name = '28_test_bin_size' 
 
 # To run on 15.06.2023: 
 # 2, 4, 5, 8, 10 

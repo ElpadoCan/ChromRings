@@ -3,6 +3,7 @@ tables
 documents
 chromrings/_version.py
 chromrings/test.py
+chromrings/data_info.json
 desktop.ini
 .setup.cfg
 

@@ -64,7 +64,8 @@ if answer.lower() == 'n':
     exit('Execution stopped')
 
 if (df_profiles['dist_perc'] < 0).any():
-    x_labels = np.arange(df_profiles['dist_perc'].min(),101,20)
+    min_x = np.clip(df_profiles['dist_perc'].min(), 100, -100)
+    x_labels = np.arange(min_x,101,20)
     add_vline_zero = True
     add_x_0_label = False
     x_label = 'Distance from nucleolus edge'
@@ -147,10 +148,13 @@ def cohen_effect_size(curve_1, curve_2):
 
 def clip_dist_perc_above_100(group):
     if len(group) == 21:
-        clipped = group[group['dist_perc'] < 105]
+        clipped = group[group['dist_perc'] <= 100]
+        clipped = clipped[clipped['dist_perc'] >= -100]
     else:
         clipped = group.copy()
-        clipped.loc[clipped['dist_perc'] == 105, 'dist_perc'] = 100
+        clipped.loc[clipped['dist_perc'] > 100, 'dist_perc'] = 100
+        clipped.loc[clipped['dist_perc'] < -100, 'dist_perc'] = -100
+
     return clipped[['Position_n', 'ID', 'dist_perc', 'normalised_intensity']]
 
 for group_name in figs:
@@ -198,7 +202,6 @@ for group_name in figs:
         # for name, group in data.groupby(['Position_n', 'ID']):
         #     if name == ('Position_9', 'ID_12_mean_radial_profile'):
         #         import pdb; pdb.set_trace()
-        
         
         _, _, im = heatmap(
             data,
@@ -261,20 +264,31 @@ for group_name in figs:
         if exp_folder.find('3D_seg') != -1:
             linestyle = '--'
         
+        xx_unique = data_agg.index.unique().to_list()
+        x_bin_size = xx_unique[1] - xx_unique[0]
+        
         if USE_ABSOLUTE_DIST:
             xx_plot = data_agg.index
+            yy_plot = data_agg.values
         else:
-            # Plot at center of bin --> move left by 2.5
-            xx_plot = data_agg.index-2.5
+            # Plot at center of bin --> move left by x_bin_size/2
+            xx_plot = data_agg.index.to_numpy()-x_bin_size/2
+            clip_100perc_mask = np.logical_and(xx_plot<=100, xx_plot>=-100)
+            xx_plot = xx_plot[clip_100perc_mask]
+            yy_plot = data_agg.to_numpy()[clip_100perc_mask]
+            data_y_low = data_y_low[clip_100perc_mask]
+            data_y_high = data_y_high[clip_100perc_mask]
         
         axis.plot(
-            xx_plot, data_agg.values, 
+            xx_plot, yy_plot, 
             color=color, 
             label=exp_folder,
             linestyle=linestyle
         )
         axis.fill_between(
-            xx_plot, data_y_low,data_y_high, 
+            xx_plot, 
+            data_y_low,
+            data_y_high, 
             color=color,
             alpha=0.3,
             linestyle=linestyle

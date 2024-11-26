@@ -32,7 +32,6 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-  "cellacdc@git+https://github.com/SchmollerLab/Cell_ACDC",
   "pyarrow",
   "pandas<2.2.0",
   "statsmodels",

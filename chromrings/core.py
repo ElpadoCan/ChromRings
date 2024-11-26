@@ -62,7 +62,8 @@ def radial_profiles(
         centers_df=None, 
         largest_nuclei_percent=None, 
         min_length_profile_pixels=0, 
-        zeroize_inner_lab_edge=False
+        zeroize_inner_lab_edge=False,
+        concatenate_profiles=False
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -117,6 +118,10 @@ def radial_profiles(
     zeroize_inner_lab_edge: bool, optional
         If `True`, the distance along the profile will be zeroised to the 
         edge of the `inner_lab`. 
+    concatenate_profiles: bool, optional
+        If `True`, concatenate each pair of profiles that crosses the 
+        center. The interval of the distance will then be -1.0 to 1.0 
+        going through the center
     
     Returns
     -------
@@ -256,8 +261,10 @@ def radial_profiles(
         obj.radial_profiles = []
         obj.resampled_radial_profiles = []
         all_dist = set()
+        all_angles = set()
         for r, (y2, x2) in enumerate(zip(rr, cc)):
             yy_line, xx_line = skimage.draw.line(y1, x1, y2, x2)
+            angle = math.atan2((y2-y1), (x2-x1))
             vals = img_data_2D[yy_line, xx_line]
             if inner_lab is not None:
                 inner_vals = inner_contours_lab[yy_line, xx_line]
@@ -302,7 +309,7 @@ def radial_profiles(
             dist_perc[:zero_dist_idx] *= - 1
             obj.radial_profiles.append({
                 'x': xx_line, 'y': yy_line, 'values': vals, 
-                'norm_dist': dist_perc
+                'norm_dist': dist_perc, 'angle': angle
             })
 
             if normalize_every_profile:
@@ -319,11 +326,13 @@ def radial_profiles(
                 dist_perc = resampled.index.astype(np.int64)
                 obj.resampled_radial_profiles.append({
                     'values': resampled['value'].values, 
-                    'norm_dist': dist_perc
+                    'norm_dist': dist_perc, 
+                    'angle': angle
                 })
                 vals = resampled['value'].values
 
             all_dist.update(dist_perc)
+            all_angles.add(angle)
 
             if inspect_single_profiles:
                 fig, ax = plt.subplots(1,2, figsize=(16,8))
@@ -345,14 +354,40 @@ def radial_profiles(
 
 
         cols = [f'value_{r}' for r in range(len(obj.resampled_radial_profiles))]
-        obj.radial_df = pd.DataFrame(index=list(all_dist), columns=cols)
+        
+        if concatenate_profiles:
+            dist = [*[-d for d in all_dist], *[d for d in all_dist]]
+        
+        all_angles = np.array(list(all_angles), dtype=float)
+        profiles_conctenated_idx = set()
+        obj.radial_df = pd.DataFrame(index=list(dist), columns=cols)
         obj.radial_df['is_saturated'] = False
         for r, profile in enumerate(obj.resampled_radial_profiles):
+            if r in profiles_conctenated_idx:
+                # Skip profiles if already concatenated
+                continue
+            
             idx = profile['norm_dist']
             # obj.radial_df[f'value_{r}'] = np.nan
             obj.radial_df.loc[idx, f'value_{r}'] = profile['values']
             is_saturated = np.max(profile['values']) == max_dtype
             obj.radial_df['is_saturated'] = is_saturated
+            if not concatenate_profiles:
+                continue
+            
+            # Find the closest -180 profile
+            angle = profile['angle']
+            opposite_angle = -angle
+            closest_angle_idx = np.argmin(np.abs(all_angles-opposite_angle))
+            closest_angle = all_angles[closest_angle_idx]
+            for ro, other_profile in enumerate(obj.resampled_radial_profiles):
+                if np.isclose(other_profile['angle'], closest_angle):
+                    break
+            
+            other_idx = other_profile['norm_dist']
+            obj.radial_df.loc[-other_idx, f'value_{r}'] = other_profile['values']
+            profiles_conctenated_idx.add(ro)                                    
+                    
         
         obj.radial_df.sort_index(inplace=True)
         obj.radial_df = obj.radial_df.astype(float)
