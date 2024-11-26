@@ -30,6 +30,17 @@
         "colors": {
             "fed": "darkturquoise"
         }
+    },
+    "0_check_chromrings_profiles": {
+        "folder_path": "data/Peter_Meister_Lab/Jenny/0_check_chromrings_profiles/1039 HS",
+        "experiments": ["30mins recovery", "no treatment"],
+        "channel": "mNeon",
+        "plots": ["30mins recovery;no treatment"],
+        "figs": [""],
+        "colors": {
+            "30mins recovery": "firebrick", 
+            "no treatment": "darkturquoise"
+        }
     }
 }
 

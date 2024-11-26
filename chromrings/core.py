@@ -356,11 +356,13 @@ def radial_profiles(
         cols = [f'value_{r}' for r in range(len(obj.resampled_radial_profiles))]
         
         if concatenate_profiles:
-            dist = [*[-d for d in all_dist], *[d for d in all_dist]]
+            all_dist = [*[-d for d in all_dist], *[d for d in all_dist]]
+        else:
+            all_dist = list(all_dist)
         
         all_angles = np.array(list(all_angles), dtype=float)
         profiles_conctenated_idx = set()
-        obj.radial_df = pd.DataFrame(index=list(dist), columns=cols)
+        obj.radial_df = pd.DataFrame(index=all_dist, columns=cols)
         obj.radial_df['is_saturated'] = False
         for r, profile in enumerate(obj.resampled_radial_profiles):
             if r in profiles_conctenated_idx:
@@ -420,6 +422,7 @@ def radial_profiles(
             else:
                 norm_func = getattr(np, normalise_how)
                 norm_value = norm_func(obj.mean_radial_profile)     
+            import pdb; pdb.set_trace()
             obj.mean_radial_profile /= norm_value
             
         profile_series = (
