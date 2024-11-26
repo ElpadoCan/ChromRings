@@ -422,7 +422,6 @@ def radial_profiles(
             else:
                 norm_func = getattr(np, normalise_how)
                 norm_value = norm_func(obj.mean_radial_profile)     
-            import pdb; pdb.set_trace()
             obj.mean_radial_profile /= norm_value
             
         profile_series = (
