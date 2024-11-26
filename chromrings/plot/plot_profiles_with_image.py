@@ -129,14 +129,17 @@ def plot(batch_name):
                     lab_3D[obj.slice][obj.image] = ID
                     lab_2D = lab_3D[round(zc)]
                     img_2D = img[round(zc)]
-                    _, ymin, xmin, _, _, _ = obj.bbox
+                    _, ymin, xmin, _, _ = obj.bbox
                 
                 xc_local, yc_local = xc-xmin, yc-ymin
                 
-                obj_2D = skimage.measure.regionprops(lab_2D)[0]
-                obj_intens_img = img_2D[obj_2D.slice]
                 if c > 11:
                     break
+                
+                rp_2D = skimage.measure.regionprops(lab_2D)
+                rp_2D_mapper = {obj.label:obj for obj in rp_2D}
+                obj_2D = rp_2D_mapper[ID]
+                obj_intens_img = img_2D[obj_2D.slice]
                 axis = ax[c]
                 inset_ax = inset_axes(
                     axis, width='35%', height='35%', loc='lower center'
