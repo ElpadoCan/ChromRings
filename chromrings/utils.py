@@ -6,7 +6,8 @@ import pandas as pd
 from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     tables_path, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS, PLANE, 
-    LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, CONCATENATE_PROFILES
+    LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, CONCATENATE_PROFILES,
+    RESCALE_INTENS_ZERO_TO_ONE
 )
 
 def listdir(path):
@@ -45,6 +46,38 @@ def read_df_profiles(
     
     if batch_name is None:
         from chromrings import batch_name
+    
+    try:
+        filename_prefix = (
+            f'{batch_name}'
+            f'_norm_single_profile_{NORMALIZE_EVERY_PROFILE}'
+            f'_norm_mean_profile_{NORMALISE_AVERAGE_PROFILE}'
+            f'_norm_how_{NORMALISE_HOW}'
+            f'_absolut_dist_{load_absolute_dist}'
+            f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
+            f'_{PLANE}plane'
+            f'_concat_profiles_{CONCATENATE_PROFILES}'
+            f'_intens_rescaled_0_1_{RESCALE_INTENS_ZERO_TO_ONE}'
+        )
+        if LARGEST_NUCLEI_PERCENT is not None:
+            filename_prefix = filename_prefix.replace(
+                f'_{PLANE}plane', 
+                f'_only_largest_nuclei_perc_{int(LARGEST_NUCLEI_PERCENT*100)}'
+                f'_{PLANE}plane'
+            )
+        if MIN_LENGTH_PROFILE_PXL > 0:
+            filename_prefix = filename_prefix.replace(
+                f'_{PLANE}plane', 
+                f'_min_length_profile_pixels_{MIN_LENGTH_PROFILE_PXL}'
+                f'_{PLANE}plane'
+            )
+        
+        df_profiles, profiles_filename = _read_df_profiles_from_prefix(
+            filename_prefix, stat_to_plot=stat_to_plot
+        )
+        return df_profiles, profiles_filename 
+    except Exception as e:
+        pass
     
     try:
         filename_prefix = (

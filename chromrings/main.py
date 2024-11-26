@@ -18,7 +18,8 @@ from chromrings import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
     PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 
-    ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST
+    ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST,
+    RESCALE_INTENS_ZERO_TO_ONE
 )
 
 np.seterr(all='raise')
@@ -186,7 +187,8 @@ for e, exp_folder in enumerate(exp_foldernames):
             largest_nuclei_percent=LARGEST_NUCLEI_PERCENT, 
             min_length_profile_pixels=MIN_LENGTH_PROFILE_PXL, 
             zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE,
-            concatenate_profiles=CONCATENATE_PROFILES
+            concatenate_profiles=CONCATENATE_PROFILES,
+            rescale_intens_zero_to_one=RESCALE_INTENS_ZERO_TO_ONE
         )
 
         IDs = []
@@ -281,6 +283,7 @@ filename_prefix = (
     f'_manual_nucleolus_centers_{USE_MANUAL_NUCLEOID_CENTERS}'
     f'_{PLANE}plane'
     f'_concat_profiles_{CONCATENATE_PROFILES}'
+    f'_intens_rescaled_0_1_{RESCALE_INTENS_ZERO_TO_ONE}'
 )
 if LARGEST_NUCLEI_PERCENT is not None:
     filename_prefix = filename_prefix.replace(

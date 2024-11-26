@@ -63,7 +63,8 @@ def radial_profiles(
         largest_nuclei_percent=None, 
         min_length_profile_pixels=0, 
         zeroize_inner_lab_edge=False,
-        concatenate_profiles=False
+        concatenate_profiles=False,
+        rescale_intens_zero_to_one=False
     ):
     """Compute the radial profile of single-cells. The final profile is the 
     average of all the possible profiles starting from weighted centroid to 
@@ -122,6 +123,8 @@ def radial_profiles(
         If `True`, concatenate each pair of profiles that crosses the 
         center. The interval of the distance will then be -1.0 to 1.0 
         going through the center
+    rescale_intens_zero_to_one: bool, optional
+        If `True`, intensities of the profiles will be rescaled 0 to 1
     
     Returns
     -------
@@ -423,6 +426,12 @@ def radial_profiles(
                 norm_func = getattr(np, normalise_how)
                 norm_value = norm_func(obj.mean_radial_profile)     
             obj.mean_radial_profile /= norm_value
+        
+        if rescale_intens_zero_to_one:
+            min_val = np.min(obj.mean_radial_profile)
+            obj.mean_radial_profile -= min_val
+            max_val = np.max(obj.mean_radial_profile)
+            obj.mean_radial_profile /= max_val
             
         profile_series = (
             obj.stds_radial_profile, obj.CVs_radial_profile, 
@@ -449,8 +458,6 @@ def radial_profiles(
             ax[1].plot(obj.mean_radial_profile.index, obj.mean_radial_profile.values)
             plt.show()
             import pdb; pdb.set_trace()
-
-        
         
         '''Describe mean_radial_profile distribution'''
         df_norm_distribution = obj.mean_radial_profile/obj.mean_radial_profile.max()

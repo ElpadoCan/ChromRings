@@ -107,6 +107,7 @@ os.makedirs(figures_path, exist_ok=True)
 
 NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True # False with 13_nucleolus_nucleus_profile
+RESCALE_INTENS_ZERO_TO_ONE = False
 NORMALISE_HOW = 'max' # 'sum' # 'max' # 'tot_fluo' # None with 13_nucleolus_nucleus_profile
 USE_ABSOLUTE_DIST = False # True goes with 13_nucleolus_nucleus_profile
 ZEROIZE_INNER_LAB_EDGE = False
