@@ -14,7 +14,9 @@ import matplotlib.patches as patches
 from tqdm import tqdm
 
 from chromrings import (
-    data_path, core, utils, tables_path, data_info_json_path,
+    data_path, core, utils, tables_path, data_info_json_path
+)
+from chromrings.current_analysis import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
     PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 

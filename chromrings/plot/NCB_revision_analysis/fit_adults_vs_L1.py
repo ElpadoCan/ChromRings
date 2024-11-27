@@ -4,8 +4,7 @@ from tqdm import tqdm
 
 import pandas as pd
 
-from chromrings import tables_path, figures_path
-from chromrings import utils, core
+from chromrings import tables_path, figures_path, utils, core
 
 SAVE = True
 STAT_TO_PLOT = 'mean' # 'CV', 'skew', 'mean'

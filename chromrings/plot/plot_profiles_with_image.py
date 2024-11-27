@@ -9,9 +9,9 @@ import numpy as np
 import skimage.io
 import skimage.measure
 
-from chromrings import data_path, figures_path
-from chromrings import (
-    data_info_json_path, utils, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS
+from chromrings import data_path, figures_path, data_info_json_path, utils
+from chromrings.current_analysis import (
+    USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS
 )
 
 import matplotlib.pyplot as plt
@@ -167,5 +167,5 @@ def plot(batch_name):
         pass
 
 if __name__ == '__main__':
-    from chromrings import batch_name
+    from chromrings.current_analysis import batch_name
     plot(batch_name)

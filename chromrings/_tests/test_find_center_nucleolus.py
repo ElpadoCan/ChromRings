@@ -13,10 +13,8 @@ import skimage.transform
 import skimage.draw
 import skimage.color
 
-from chromrings import data_path, figures_path
-from chromrings import (
-    data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST
-)
+from chromrings import data_path, figures_path, data_info_json_path, utils
+from chromrings.current_analysis import USE_ABSOLUTE_DIST
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes

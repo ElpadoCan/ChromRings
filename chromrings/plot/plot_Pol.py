@@ -9,14 +9,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 
-from acdctools.plot import heatmap
+from cellacdc.plot import heatmap
 
 # import diptest
 
-from chromrings import tables_path, figures_path
-from chromrings import (
-    utils, data_info_json_path, USE_MANUAL_NUCLEOID_CENTERS
-)
+from chromrings import tables_path, figures_path, data_info_json_path, utils
+from chromrings.current_analysis import USE_MANUAL_NUCLEOID_CENTERS
 
 SAVE = True
 NORMALISE_BY_MAX = False

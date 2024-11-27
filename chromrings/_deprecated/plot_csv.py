@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 # import diptest
 
 from chromrings import tables_path, core
-from chromrings import (
+from chromrings.current_analysis import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
     exp_folder
 )

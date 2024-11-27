@@ -112,14 +112,11 @@ if not os.path.exists(data_info_json_path):
         f'{header}'
     )
 
-pwd_path = os.path.dirname(chromrings_path)
-data_path = os.path.join(pwd_path, 'data')
-tables_path = os.path.join(pwd_path, 'tables')
-figures_path = os.path.join(pwd_path, 'figures')
-
-os.makedirs(tables_path, exist_ok=True)
-os.makedirs(figures_path, exist_ok=True)
-
+current_analysis_path = os.path.join(chromrings_path, 'current_analysis.py')
+if not os.path.exists(current_analysis_path):
+    with open(current_analysis_path, 'w') as txt:
+        txt.write(
+"""
 NORMALIZE_EVERY_PROFILE = False
 NORMALISE_AVERAGE_PROFILE = True # False with 13_nucleolus_nucleus_profile
 RESCALE_INTENS_ZERO_TO_ONE = False
@@ -148,6 +145,17 @@ RESAMPLE_BIN_SIZE_DIST = 5
 # '5_WT_starved_DNA_vs_histone', '4_WT_refed'
 # '3_Daf15' '2_Pol_I_II_III', '1_test_3D_vs_2D' 
 batch_name = '0_check_chromrings_profiles' 
+"""
+        )
+        
+
+pwd_path = os.path.dirname(chromrings_path)
+data_path = os.path.join(pwd_path, 'data')
+tables_path = os.path.join(pwd_path, 'tables')
+figures_path = os.path.join(pwd_path, 'figures')
+
+os.makedirs(tables_path, exist_ok=True)
+os.makedirs(figures_path, exist_ok=True)
 
 # To run on 15.06.2023: 
 # 2, 4, 5, 8, 10 

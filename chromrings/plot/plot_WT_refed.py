@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 
-from acdctools.plot import heatmap
+from cellacdc.plot import heatmap
 
 # import diptest
 
-from chromrings import tables_path, figures_path
-from chromrings import (
+from chromrings import tables_path, figures_path, data_info_json_path
+from chromrings.current_analysis import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    data_info_json_path, batch_name
+    batch_name
 )
 from chromrings.core import keep_last_point_less_nans
 

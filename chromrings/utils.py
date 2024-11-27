@@ -3,10 +3,12 @@ from natsort import natsorted
 
 import pandas as pd
 
-from chromrings import (
+from chromrings import tables_path
+from chromrings.current_analysis import (
     NORMALIZE_EVERY_PROFILE, NORMALISE_AVERAGE_PROFILE, NORMALISE_HOW,
-    tables_path, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS, PLANE, 
-    LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, CONCATENATE_PROFILES,
+    batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
+    PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 
+    ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST,
     RESCALE_INTENS_ZERO_TO_ONE
 )
 
@@ -45,7 +47,7 @@ def read_df_profiles(
         load_absolute_dist = USE_ABSOLUTE_DIST
     
     if batch_name is None:
-        from chromrings import batch_name
+        from chromrings.current_analysis import batch_name
     
     try:
         filename_prefix = (

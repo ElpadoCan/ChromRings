@@ -8,8 +8,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from chromrings import tables_path, data_path
-from chromrings import core, utils
+from chromrings import tables_path, data_path, core, utils
 
 # '13_nucleolus_nucleus_profile'
 MUSCLES_NUCLEOLUS_DATA = '27_muscles_resol_limit'

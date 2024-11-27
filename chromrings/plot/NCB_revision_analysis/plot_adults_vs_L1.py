@@ -7,8 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from chromrings import tables_path, figures_path
-from chromrings import utils, core
+from chromrings import tables_path, figures_path, utils, core
 
 TABLE_FILENAME = 'adults_vs_L1s_starved'
 

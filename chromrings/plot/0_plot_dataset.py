@@ -22,9 +22,9 @@ from cellacdc.myutils import pairwise
 
 # import diptest
 
-from chromrings import tables_path, figures_path
-from chromrings import (
-    data_info_json_path, batch_name, utils, USE_ABSOLUTE_DIST, 
+from chromrings import tables_path, figures_path, data_info_json_path, utils
+from chromrings.current_analysis import (
+    batch_name, USE_ABSOLUTE_DIST, 
     NORMALISE_AVERAGE_PROFILE, NORMALIZE_EVERY_PROFILE, 
     USE_MANUAL_NUCLEOID_CENTERS, LARGEST_NUCLEI_PERCENT, 
     MIN_LENGTH_PROFILE_PXL
@@ -147,13 +147,15 @@ def cohen_effect_size(curve_1, curve_2):
     
 
 def clip_dist_perc_above_100(group):
-    if len(group) == 21:
-        clipped = group[group['dist_perc'] <= 100]
-        clipped = clipped[clipped['dist_perc'] >= -100]
-    else:
-        clipped = group.copy()
-        clipped.loc[clipped['dist_perc'] > 100, 'dist_perc'] = 100
-        clipped.loc[clipped['dist_perc'] < -100, 'dist_perc'] = -100
+    # if len(group) == 21:
+    #     clipped = group[group['dist_perc'] <= 100]
+    #     clipped = clipped[clipped['dist_perc'] >= -100]
+    # else:
+    #     clipped = group.copy()
+    #     clipped.loc[clipped['dist_perc'] > 100, 'dist_perc'] = 100
+    #     clipped.loc[clipped['dist_perc'] < -100, 'dist_perc'] = -100
+    clipped = group[group['dist_perc'] <= 100]
+    clipped = clipped[clipped['dist_perc'] >= -100]
 
     return clipped[['Position_n', 'ID', 'dist_perc', 'normalised_intensity']]
 
