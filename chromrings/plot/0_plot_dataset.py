@@ -272,23 +272,24 @@ for group_name in figs:
         if USE_ABSOLUTE_DIST:
             xx_plot = data_agg.index
             yy_plot = data_agg.values
+            xx_plot_clip = xx_plot
         else:
             # Plot at center of bin --> move left by x_bin_size/2
             xx_plot = data_agg.index.to_numpy()-x_bin_size/2
             clip_100perc_mask = np.logical_and(xx_plot<=100, xx_plot>=-100)
-            xx_plot = xx_plot[clip_100perc_mask]
+            xx_plot_clip = xx_plot[clip_100perc_mask]
             yy_plot = data_agg.to_numpy()[clip_100perc_mask]
             data_y_low = data_y_low[clip_100perc_mask]
             data_y_high = data_y_high[clip_100perc_mask]
         
         axis.plot(
-            xx_plot, yy_plot, 
+            xx_plot_clip, yy_plot, 
             color=color, 
             label=exp_folder,
             linestyle=linestyle
         )
         axis.fill_between(
-            xx_plot, 
+            xx_plot_clip, 
             data_y_low,
             data_y_high, 
             color=color,
