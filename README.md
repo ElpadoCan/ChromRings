@@ -1,5 +1,7 @@
 # ChromRings
-Python package to quantify chromatin reorganisation in *C. elegans* upon starvation. 
+Python package used to extract all radial intensity profiles from segmented objects. 
+
+This package was used to quantify chromatin reorganisation in *C. elegans* upon starvation. See paper on [Nature Cell Biology](https://www.nature.com/articles/s41556-024-01512-w)
 
 ## Installation
 
