@@ -97,6 +97,21 @@ def printl(*objects, pretty=False, is_decorator=False, **kwargs):
 
 chromrings_path = os.path.dirname(os.path.abspath(__file__))
 data_info_json_path = os.path.join(chromrings_path, 'data_info.json')
+
+if not os.path.exists(data_info_json_path):
+    header = '*'*100
+    exit(
+        f'{header}\n'
+        '[ERROR]: The "data_info.json" file was not found.\n\n'
+        'Have a look in the folder `ChromRings/examples_data_info_jsons` '
+        'for example files.\n\n'
+        'If you need help with this, feel free to open an issue on our '
+        'GitHub page at the following link:\n\n'
+        'https://github.com/ElpadoCan/ChromRings/issues\n\n'
+        'Thank you for your patience!\n'
+        f'{header}'
+    )
+
 pwd_path = os.path.dirname(chromrings_path)
 data_path = os.path.join(pwd_path, 'data')
 tables_path = os.path.join(pwd_path, 'tables')
