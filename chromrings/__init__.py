@@ -147,6 +147,18 @@ RESAMPLE_BIN_SIZE_DIST = 5
 batch_name = '0_check_chromrings_profiles' 
 """
         )
+    header = '*'*100
+    exit(
+        f'{header}\n'
+        '[WARNING]: ChromRings had to initialize the "current_analysis.py" file.\n\n'
+        'Make sure you review the parameters of the analysis before running '
+        'it again.\n\n'
+        'If you need help with this, feel free to open an issue on our '
+        'GitHub page at the following link:\n\n'
+        'https://github.com/ElpadoCan/ChromRings/issues\n\n'
+        'Thank you for your patience!\n'
+        f'{header}'
+    )
         
 
 pwd_path = os.path.dirname(chromrings_path)
