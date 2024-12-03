@@ -325,14 +325,21 @@ def radial_profiles(
                 
                 _df.index = pd.to_datetime(_df.index)
                 rs = f'{resample_bin_size_dist}ns'
-                resampled = _df.resample(rs, label='right').mean().dropna()
-                dist_perc = resampled.index.astype(np.int64)
+                bin_place = 'left' if concatenate_profiles else 'right'
+                resampled = _df.resample(rs, label=bin_place).mean().dropna()
+                resampled['dist_perc'] = resampled.index.astype(np.int64)
+                if not use_absolute_dist and resampled['dist_perc'].max() > 100:
+                    outer_mean_val = resampled[resampled['dist_perc']>=100].mean()
+                    outer_mean_val['dist_perc'] = 100
+                    resampled = resampled[resampled['dist_perc']<=100]
+                    resampled.iloc[-1] = outer_mean_val
+                vals = resampled['value'].values
+                dist_perc = resampled['dist_perc'].values
                 obj.resampled_radial_profiles.append({
-                    'values': resampled['value'].values, 
+                    'values': vals, 
                     'norm_dist': dist_perc, 
                     'angle': angle
                 })
-                vals = resampled['value'].values
 
             all_dist.update(dist_perc)
             all_angles.add(angle)
@@ -355,11 +362,11 @@ def radial_profiles(
         if not resample_bin_size_dist > 0:
             obj.resampled_radial_profiles = obj.radial_profiles
 
-
         cols = [f'value_{r}' for r in range(len(obj.resampled_radial_profiles))]
         
         if concatenate_profiles:
             all_dist = [*[-d for d in all_dist], *[d for d in all_dist]]
+            all_dist = list(set(all_dist))
         else:
             all_dist = list(all_dist)
         
@@ -374,7 +381,10 @@ def radial_profiles(
             
             idx = profile['norm_dist']
             # obj.radial_df[f'value_{r}'] = np.nan
-            obj.radial_df.loc[idx, f'value_{r}'] = profile['values']
+            try:
+                obj.radial_df.loc[idx, f'value_{r}'] = profile['values']
+            except Exception as err:
+                import pdb; pdb.set_trace()
             is_saturated = np.max(profile['values']) == max_dtype
             obj.radial_df['is_saturated'] = is_saturated
             if not concatenate_profiles:
@@ -382,7 +392,7 @@ def radial_profiles(
             
             # Find the closest -180 profile
             angle = profile['angle']
-            opposite_angle = -angle
+            opposite_angle = angle - np.sign(angle)*np.pi
             closest_angle_idx = np.argmin(np.abs(all_angles-opposite_angle))
             closest_angle = all_angles[closest_angle_idx]
             for ro, other_profile in enumerate(obj.resampled_radial_profiles):
@@ -391,11 +401,13 @@ def radial_profiles(
             
             other_idx = other_profile['norm_dist']
             obj.radial_df.loc[-other_idx, f'value_{r}'] = other_profile['values']
-            profiles_conctenated_idx.add(ro)                                    
-                    
+            profiles_conctenated_idx.add(ro)  
+            profiles_conctenated_idx.add(r)   
         
-        obj.radial_df.sort_index(inplace=True)
-        obj.radial_df = obj.radial_df.astype(float)
+        obj.radial_df = (
+            obj.radial_df.dropna(axis=1, how='all').sort_index().astype(float)
+        )
+        cols = obj.radial_df.columns.intersection(cols)
         
         radial_df = obj.radial_df[cols]
         obj.mean_radial_profile = radial_df.mean(axis=1)
