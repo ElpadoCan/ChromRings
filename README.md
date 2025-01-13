@@ -56,7 +56,7 @@ Next, you can run the analysis by running the `ChromRings\chromrings\main.py` fi
 
 ## Citing
 
-If you use this tool in your publication, please cite our publication [here](https://www.biorxiv.org/content/10.1101/2023.07.22.550032v1) as follows:
+If you use this tool in your publication, please cite our publication [here](https://doi.org/10.1038/s41556-024-01512-w) as follows:
 
 > Al-Refaie, N., Padovani, F., Hornung, J., Pudelko, L., Binando, F., Fabregat d.C., Zhao, Q., Towbin, B. D., Cenik, E. S., Stroustrup, N., Padeken, J., Schmoller, K. M., Cabianca, D. S., Fasting shapes chromatin architecture through an mTOR/RNA Pol I axis. *Nat Cell Biol* **26**, 1903–1917 (2024).
 
