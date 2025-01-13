@@ -15,7 +15,14 @@ Note that the data to be analysed must reside in the folder `ChromRings/data`.
 
 Once you have the segmentation of the nuclei with the correct data structure (as requested by Cell-ACDC) the chromatin distribution analysis is fully automatic. 
 
-To run the analysis, you need to modify the JSON file called [ChromRings/chromrings/data_info.json](https://github.com/ElpadoCan/ChromRings/blob/main/chromrings/data_info.json) with the location of the data and the pairs of conditions you want to compare. 
+To run the analysis, you need to create a JSON file in the following location:
+
+```
+ChromRings/chromrings/data_info.json
+```
+
+This file contais information about the location of the data and the pairs of conditions you want to compare. You can find example JSON files in this folder 
+[ChromRings/examples_data_info_jsons](https://github.com/ElpadoCan/ChromRings/examples_data_info_jsons).
 
 Example:
 
@@ -44,7 +51,9 @@ In the example above the folder `data/1_test_3D_vs_2D_01-02-2023` contains the s
 
 At the entry `"plots"` you can define the pairs of conditions you want to compare. In any case, you will get one heatmap for each condition (one condition, one experiment folder). 
 
-The JSON file will contain information about all the experiments you want or you will analyse. Once you modify the JSON file, you need to tell the software which experiment you want to analyse. To do so you need to modify the following variable in the `ChromRings\chromrings\__init__.py`:
+The JSON file will contain information about all the experiments you want or you will analyse. 
+
+Next, rename the file `ChromRings\chromrings\_example_current_analysis.py` to `current_analysis.py`. Finally, you need to tell the software which experiment you want to analyse. To do so you need to modify the following variable in the `ChromRings\chromrings\current_analysis.py`:
 
 ```
 batch_name = '1_test_3D_vs_2D' 
