@@ -21,7 +21,7 @@ from chromrings.current_analysis import (
     batch_name, USE_ABSOLUTE_DIST, USE_MANUAL_NUCLEOID_CENTERS,
     PLANE, LARGEST_NUCLEI_PERCENT, MIN_LENGTH_PROFILE_PXL, 
     ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST,
-    RESCALE_INTENS_ZERO_TO_ONE
+    RESCALE_INTENS_ZERO_TO_ONE, AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES
 )
 
 np.seterr(all='raise')
@@ -131,17 +131,33 @@ for e, exp_folder in enumerate(exp_foldernames):
                 nucleolus_centers_csv_filename = file
 
         if image_filename is None:
-            main_pbar.close()
-            raise FileNotFoundError(
-                'The following experiment does not have the file ending with '
-                f'"{channel}.tif": "{images_path}"'
-            )
+            if AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES:
+                print(
+                    '\n[WARNING] Skipping the following position because it does not have the '
+                    f' channel file ending with "{channel}.tif":\n\n'
+                    f'"{images_path}"'
+                )
+                continue
+            else:
+                main_pbar.close()
+                raise FileNotFoundError(
+                    'The following experiment does not have the file ending with '
+                    f'"{channel}.tif": "{images_path}"'
+                )
         if segm_filename is None:
-            main_pbar.close()
-            raise FileNotFoundError(
-                'The following experiment does not have a the file ending with '
-                f'"segm.npz": "{images_path}"'
-            )
+            if AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES:
+                print(
+                    '\n[WARNING] Skipping the following position because it does not have the '
+                    ' segmentation file:\n\n'
+                    f'"{images_path}"'
+                )
+                continue
+            else:
+                main_pbar.close()
+                raise FileNotFoundError(
+                    'The following experiment does not have a the file ending with '
+                    f'"segm.npz": "{images_path}"'
+                )
         if nucleolus_segm_filename is None:
             nucleolus_segm_data = None
         else:
