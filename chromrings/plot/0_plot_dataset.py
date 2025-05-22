@@ -98,7 +98,7 @@ if USE_ABSOLUTE_DIST:
         left_space = left_space[:-1]
     right_space = np.linspace(0, stop, right_num)
     x_dist_labels = np.round(np.concatenate((left_space, right_space)), 2)
-    x_label = f'{x_label} [$\mu$m]'
+    x_label = fr'{x_label} [$\mu$m]'
 else:
     x_label = f'{x_label} [%]'
     x_dist_labels = x_labels
@@ -164,6 +164,12 @@ for group_name in figs:
         exp_folder for exp_folder in exp_foldernames 
         if exp_folder.startswith(group_name)
     ]
+    if not plot_experiments:
+        raise ValueError(
+            f'None of the experiment folders starts with "{group_name}"'
+            'Make sure that the value for "figs" in the json file is a common '
+            'start for each experiment folder name'.
+        )
     ncols = len(plot_experiments)
     nrows = 3
     fig, ax = plt.subplots(nrows, ncols, figsize=(ncols*5,9))
