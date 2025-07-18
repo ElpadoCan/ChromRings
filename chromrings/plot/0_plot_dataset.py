@@ -168,7 +168,7 @@ for group_name in figs:
         raise ValueError(
             f'None of the experiment folders starts with "{group_name}"'
             'Make sure that the value for "figs" in the json file is a common '
-            'start for each experiment folder name'.
+            'start for each experiment folder name'
         )
     ncols = len(plot_experiments)
     nrows = 3
