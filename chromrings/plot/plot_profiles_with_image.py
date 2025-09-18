@@ -129,7 +129,7 @@ def plot(batch_name):
                     lab_3D[obj.slice][obj.image] = ID
                     lab_2D = lab_3D[round(zc)]
                     img_2D = img[round(zc)]
-                    _, ymin, xmin, _, _ = obj.bbox
+                    _, ymin, xmin, _, _, _ = obj.bbox
                 
                 xc_local, yc_local = xc-xmin, yc-ymin
                 
