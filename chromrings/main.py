@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,10 @@ from chromrings.current_analysis import (
     ZEROIZE_INNER_LAB_EDGE, CONCATENATE_PROFILES, RESAMPLE_BIN_SIZE_DIST,
     RESCALE_INTENS_ZERO_TO_ONE, AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES
 )
+try:
+    from chromrings.current_analysis import SKIP_POSITIONS_WITH_ISSUES
+except Exception as err:
+    SKIP_POSITIONS_WITH_ISSUES = False
 
 np.seterr(all='raise')
 
@@ -110,8 +115,11 @@ for e, exp_folder in enumerate(exp_foldernames):
         channel = channel_name
     else:
         channel = channel_name[e]
-    for position_n in tqdm(pos_foldernames, ncols=100, desc='Position', leave=False):
-        images_path = os.path.join(exp_path, position_n, 'Images')
+    for position_n in tqdm(
+            pos_foldernames, ncols=100, desc='Position', leave=False
+        ):
+        pos_path = os.path.join(exp_path, position_n)
+        images_path = os.path.join(pos_path, 'Images')
         segm_filename = None
         image_filename = None
         nucleolus_segm_filename = None
@@ -186,28 +194,38 @@ for e, exp_folder in enumerate(exp_foldernames):
         segm_data = np.load(segm_filepath)['arr_0']
         img_data = skimage.io.imread(image_filepath)
 
-        rp = core.radial_profiles(
-            segm_data, img_data, 
-            how='object', 
-            plane=PLANE,
-            invert_intensities=True, 
-            resample_bin_size_dist=resample_bin_size_dist,
-            extra_radius=0,
-            tqdm_kwargs={'position': 2, 'leave': False, 'ncols': 100},
-            normalize_every_profile=NORMALIZE_EVERY_PROFILE,
-            normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
-            normalise_how=NORMALISE_HOW,
-            inspect_single_profiles=INSPECT_SINGLE_PROFILES,
-            inspect_mean_profile=INSPECT_MEAN_PROFILE,
-            inner_lab=nucleolus_segm_data,
-            use_absolute_dist=USE_ABSOLUTE_DIST,
-            centers_df=nucleolus_centers_df, 
-            largest_nuclei_percent=LARGEST_NUCLEI_PERCENT, 
-            min_length_profile_pixels=MIN_LENGTH_PROFILE_PXL, 
-            zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE,
-            concatenate_profiles=CONCATENATE_PROFILES,
-            rescale_intens_zero_to_one=RESCALE_INTENS_ZERO_TO_ONE
-        )
+        try:
+            rp = core.radial_profiles(
+                segm_data, img_data, 
+                how='object', 
+                plane=PLANE,
+                invert_intensities=True, 
+                resample_bin_size_dist=resample_bin_size_dist,
+                extra_radius=0,
+                tqdm_kwargs={'position': 2, 'leave': False, 'ncols': 100},
+                normalize_every_profile=NORMALIZE_EVERY_PROFILE,
+                normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
+                normalise_how=NORMALISE_HOW,
+                inspect_single_profiles=INSPECT_SINGLE_PROFILES,
+                inspect_mean_profile=INSPECT_MEAN_PROFILE,
+                inner_lab=nucleolus_segm_data,
+                use_absolute_dist=USE_ABSOLUTE_DIST,
+                centers_df=nucleolus_centers_df, 
+                largest_nuclei_percent=LARGEST_NUCLEI_PERCENT, 
+                min_length_profile_pixels=MIN_LENGTH_PROFILE_PXL, 
+                zeroize_inner_lab_edge=ZEROIZE_INNER_LAB_EDGE,
+                concatenate_profiles=CONCATENATE_PROFILES,
+                rescale_intens_zero_to_one=RESCALE_INTENS_ZERO_TO_ONE
+            )
+        except Exception as err:
+            print('')
+            print('*'*100)
+            print(f'[ERROR]: Error on Position "{pos_path}"')
+            print('^'*100)
+            if SKIP_POSITIONS_WITH_ISSUES:
+                traceback.print_exc()
+            else:
+                raise err
 
         IDs = []
         argmeans = []

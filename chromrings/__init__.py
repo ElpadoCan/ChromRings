@@ -129,6 +129,8 @@ LARGEST_NUCLEI_PERCENT = None # 0.2 # None
 MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
 CONCATENATE_PROFILES = False # True if profiles should go -1.0 ,0, 1.0 where 0 is center
 RESAMPLE_BIN_SIZE_DIST = 5
+SKIP_POSITIONS_WITH_ISSUES = False
+AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES = True
 
 # '28_test_bin_size'
 # '24h recovery'

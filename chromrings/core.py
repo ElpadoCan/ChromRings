@@ -228,6 +228,13 @@ def radial_profiles(
         # import pdb; pdb.set_trace()
         
         x1, y1 = round(xc), round(yc)
+        if lab_2D[y1, x1] == 0:
+            raise TypeError(
+                f'The center of object ID {obj.label} is outside of the object! '
+                'Analysis cannot proceed. This could be caused by two objects '
+                'having the same ID.'
+            )
+        
         ymin, xmin, ymax, xmax = obj_z.bbox
         h, w = ymax-ymin, xmax-xmin 
         radius = round(max(h, w)/2 + sp)
