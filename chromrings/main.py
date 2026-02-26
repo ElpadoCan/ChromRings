@@ -31,6 +31,7 @@ except Exception as err:
 
 np.seterr(all='raise')
 
+DILATE_RADIUS_PXL = 5
 SAVE = True
 INSPECT_SINGLE_PROFILES = False
 INSPECT_MEAN_PROFILE = False
@@ -201,7 +202,7 @@ for e, exp_folder in enumerate(exp_foldernames):
                 plane=PLANE,
                 invert_intensities=True, 
                 resample_bin_size_dist=resample_bin_size_dist,
-                extra_radius=0,
+                extra_radius=DILATE_RADIUS_PXL,
                 tqdm_kwargs={'position': 2, 'leave': False, 'ncols': 100},
                 normalize_every_profile=NORMALIZE_EVERY_PROFILE,
                 normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
