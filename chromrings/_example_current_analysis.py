@@ -9,7 +9,7 @@ USE_MANUAL_NUCLEOID_CENTERS = False # True False
 PLANE = 'xy' # 'xy', 'yz', or 'xz'
 LARGEST_NUCLEI_PERCENT = None # 0.2 # None
 MIN_LENGTH_PROFILE_PXL = 0 # 9 (goes with 27_muscles_resol_limit) # 0
-CONCATENATE_PROFILES = True # True if profiles should go -1.0 ,0, 1.0 where 0 is center
+CONCATENATE_PROFILES = False # True if profiles should go -1.0 ,0, 1.0 where 0 is center
 RESAMPLE_BIN_SIZE_DIST = 10
 AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES = False # True
 
