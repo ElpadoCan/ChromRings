@@ -131,6 +131,7 @@ CONCATENATE_PROFILES = False # True if profiles should go -1.0 ,0, 1.0 where 0 i
 RESAMPLE_BIN_SIZE_DIST = 5
 SKIP_POSITIONS_WITH_ISSUES = False
 AUTOMATICALLY_SKIP_POS_WITHOUT_ALL_FILES = True
+MANUAL_NUCLEOID_CENTERS_ENDNAME = 'nu.csv'
 
 # '28_test_bin_size'
 # '24h recovery'

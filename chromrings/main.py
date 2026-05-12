@@ -29,6 +29,11 @@ try:
 except Exception as err:
     SKIP_POSITIONS_WITH_ISSUES = False
 
+try:
+    from chromrings.current_analysis import MANUAL_NUCLEOID_CENTERS_ENDNAME
+except Exception as err:
+    MANUAL_NUCLEOID_CENTERS_ENDNAME = 'nu.csv'
+
 np.seterr(all='raise')
 
 DILATE_RADIUS_PXL = 5
@@ -136,7 +141,7 @@ for e, exp_folder in enumerate(exp_foldernames):
                 nucleolus_segm_filename = file
             elif file.endswith('segm.npz'):
                 segm_filename = file
-            elif file.endswith('nu.csv'):
+            elif file.endswith(MANUAL_NUCLEOID_CENTERS_ENDNAME):
                 nucleolus_centers_csv_filename = file
 
         if image_filename is None:

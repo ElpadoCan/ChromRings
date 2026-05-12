@@ -73,7 +73,10 @@ else:
     x_labels = np.arange(0,101,20)
     add_vline_zero = False
     add_x_0_label = True
-    x_label = 'Distance from nucleus center of mass'
+    if USE_MANUAL_NUCLEOID_CENTERS:
+        x_label = 'Distance from manually annotated center'
+    else:
+        x_label = 'Distance from nucleus center of mass'
 
 if USE_ABSOLUTE_DIST:
     df_profiles = df_profiles.set_index('dist_perc')
