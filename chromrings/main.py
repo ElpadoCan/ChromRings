@@ -29,8 +29,14 @@ try:
 except Exception as err:
     SKIP_POSITIONS_WITH_ISSUES = False
 
+try:
+    from chromrings.current_analysis import MANUAL_NUCLEOID_CENTERS_ENDNAME
+except Exception as err:
+    MANUAL_NUCLEOID_CENTERS_ENDNAME = 'nu.csv'
+
 np.seterr(all='raise')
 
+DILATE_RADIUS_PXL = 5
 SAVE = True
 INSPECT_SINGLE_PROFILES = False
 INSPECT_MEAN_PROFILE = False
@@ -135,7 +141,7 @@ for e, exp_folder in enumerate(exp_foldernames):
                 nucleolus_segm_filename = file
             elif file.endswith('segm.npz'):
                 segm_filename = file
-            elif file.endswith('nu.csv'):
+            elif file.endswith(MANUAL_NUCLEOID_CENTERS_ENDNAME):
                 nucleolus_centers_csv_filename = file
 
         if image_filename is None:
@@ -201,7 +207,7 @@ for e, exp_folder in enumerate(exp_foldernames):
                 plane=PLANE,
                 invert_intensities=True, 
                 resample_bin_size_dist=resample_bin_size_dist,
-                extra_radius=0,
+                extra_radius=DILATE_RADIUS_PXL,
                 tqdm_kwargs={'position': 2, 'leave': False, 'ncols': 100},
                 normalize_every_profile=NORMALIZE_EVERY_PROFILE,
                 normalise_average_profile=NORMALISE_AVERAGE_PROFILE,
