@@ -7,6 +7,7 @@ chromrings/test.py
 chromrings/data_info.json
 desktop.ini
 .setup.cfg
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
