@@ -5,6 +5,8 @@ chromrings/current_analysis.py
 chromrings/_version.py
 chromrings/test.py
 chromrings/data_info.json
+figures/*
+!figures/.gitkeep
 desktop.ini
 .setup.cfg
 .vscode
