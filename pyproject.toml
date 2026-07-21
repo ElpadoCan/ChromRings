@@ -33,7 +33,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "pyarrow",
-  "pandas<2.2.0",
+  "pandas",
   "statsmodels",
   "seaborn",
 ]

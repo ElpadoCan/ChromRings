@@ -150,17 +150,8 @@ def cohen_effect_size(curve_1, curve_2):
     
 
 def clip_dist_perc_above_100(group):
-    # if len(group) == 21:
-    #     clipped = group[group['dist_perc'] <= 100]
-    #     clipped = clipped[clipped['dist_perc'] >= -100]
-    # else:
-    #     clipped = group.copy()
-    #     clipped.loc[clipped['dist_perc'] > 100, 'dist_perc'] = 100
-    #     clipped.loc[clipped['dist_perc'] < -100, 'dist_perc'] = -100
-    clipped = group[group['dist_perc'] <= 100]
-    clipped = clipped[clipped['dist_perc'] >= -100]
-
-    return clipped[['Position_n', 'ID', 'dist_perc', 'normalised_intensity']]
+    clipped = group[group['dist_perc'].between(-100, 100)]
+    return clipped[['dist_perc', 'normalised_intensity']]
 
 for group_name in figs:
     plot_experiments = [
@@ -201,14 +192,20 @@ for group_name in figs:
         
         """Heatmap"""
         axis = ax[0, col]
-        data = (
-            df_long.loc[exp_folder]
-            .reset_index()
-            .groupby(['Position_n', 'ID'], as_index=False)
-            .apply(clip_dist_perc_above_100)
-            .reset_index()
-            .fillna(method='ffill')
+        groupby = (
+            df_long.loc[exp_folder].reset_index().groupby(['Position_n', 'ID'])
         )
+
+        try:
+            result = groupby.apply(
+                clip_dist_perc_above_100,
+                include_groups=False,
+            )
+        except TypeError:
+            # pandas < 2.2
+            result = groupby.apply(clip_dist_perc_above_100)
+
+        data = result.reset_index().ffill()
 
         # for name, group in data.groupby(['Position_n', 'ID']):
         #     if name == ('Position_9', 'ID_12_mean_radial_profile'):
